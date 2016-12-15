@@ -56,34 +56,58 @@
     if ( chancePoo <= probability ) {
       let coords = this.offset();
       let poo1 = Droppings.clone(true);
+      //let poo1 = jQuery.extend(true, {}, Droppings);
       let pooID = 'poo-' + this.collectionPoos.length;
       poo1.attr({id: pooID});
-      this.collectionPoos.push(poo1);
-      world.append(poo1);
       poo1.offset({left: coords.left, top: coords.top});
+      this.collectionPoos.push(poo1);
+      world.append(this.collectionPoos[this.collectionPoos.length - 1]);
     }
   }
 
-  let ant1 = Antity;
-  const spawnLocation = { left: function() {
-    return Math.floor($(window).width() / 2) + 'px';
-  }, top: function() {
-    return Math.floor($(window).height() / 2) + 'px';
-  } };
-  ant1.css('left', spawnLocation.left);
-  ant1.css('top', spawnLocation.top);
-  world.append(ant1);
-  ant1.offset(spawnLocation);
+  const antities = new Array();
+
+  function createAntity(event = undefined) {
+    let spawnLocation = { left: '0px', top: '0px' };
+
+    if (event !== undefined) {
+      spawnLocation.left = event.offsetX + 'px';
+      spawnLocation.top = event.offsetY + 'px';
+    }
+
+    let newAnt = jQuery.extend(true, {}, Antity);
+    //let newAnt = Antity;
+    //let newAnt = Antity.clone(true, true);
+    let antID = 'antity-' + antities.length;
+    newAnt.attr({id: antID});
+    newAnt.css('left', spawnLocation.left);
+    newAnt.css('top', spawnLocation.top);
+    antities.push(newAnt);
+    world.append(antities[antities.length - 1]);
+  }
 
   function loop() {
-    ant1.doChooseDirection();
-    ant1.doMove();
-    ant1.doPoo();
+    for( let i = 0; i < antities.length; i++) {
+      antities[i].doChooseDirection();
+      antities[i].doMove();
+      antities[i].doPoo();
+    }
+
     $('.dropping').each(function() {
       doFade($(this));
     });
-    setTimeout(loop, 1);
+    setTimeout(loop, 50);
   }
 
+  let starter = {
+    offsetX: $(window).width() / 2,
+    offsetY: $(window).height() / 2
+  };
+  createAntity(starter);
   loop();
+
+  $(document).click(function(e) {
+    createAntity(e);
+    //console.log(antities);
+  });
 }());
