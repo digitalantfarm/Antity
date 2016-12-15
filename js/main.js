@@ -4,12 +4,12 @@
   const Droppings = $('<div />');
   Droppings.addClass('dropping');
 
-  Droppings.doFade = function() {
-    let currentOpacity = this.css('opacity');
+  const doFade = function(thing) {
+    let currentOpacity = thing.css('opacity');
     if (currentOpacity <= 0) {
-      this.remove();
+      thing.remove();
     } else {
-      this.css('opacity', currentOpacity - 0.1);
+      thing.css('opacity', currentOpacity - 0.0005);
     }
   }
 
@@ -39,7 +39,9 @@
     const chancePoo = Math.random();
     if ( chancePoo <= probability ) {
       let coords = this.offset();
-      let poo1 = Droppings.clone();
+      let poo1 = Droppings.clone(true);
+      let pooID = 'poo-' + this.collectionPoos.length;
+      poo1.attr({id: pooID});
       this.collectionPoos.push(poo1);
       world.append(poo1);
       poo1.offset({left: coords.left, top: coords.top});
@@ -61,6 +63,9 @@
     ant1.doChooseDirection();
     ant1.doMove();
     ant1.doPoo();
+    $('.dropping').each(function() {
+      doFade($(this));
+    });
     setTimeout(loop, 1);
   }
 
