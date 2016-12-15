@@ -21,7 +21,23 @@
 
   Antity.doMove = function() {
     let coords = this.offset();
-    this.offset({left: coords.left + this.modDirection.left, top: coords.top + this.modDirection.top});
+    let newOffset = {left: coords.left, top: coords.top};
+    let worldWidth = $(window).width();
+    let worldHeight = $(window).height();
+
+    if ( ( coords.left + this.modDirection.left ) < 0 || ( coords.left + this.modDirection.left ) > worldWidth ) {
+      newOffset.left = coords.left - this.modDirection.left;
+    } else {
+      newOffset.left = coords.left + this.modDirection.left;
+    }
+
+    if ( ( coords.top + this.modDirection.top ) < 0 || ( coords.top + this.modDirection.top ) > worldHeight ) {
+      newOffset.top = coords.top - this.modDirection.top;
+    } else {
+      newOffset.top = coords.top + this.modDirection.top;
+    }
+
+    this.offset(newOffset);
   }
 
   Antity.doChooseDirection = function(probability = 0.1) {
