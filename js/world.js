@@ -1,4 +1,5 @@
 var antities = new Array();
+var loopCount = 0;
 
 (function() {
   const world = $('#world');
@@ -51,6 +52,7 @@ var antities = new Array();
         }
     }
 
+    loopCount++;
     setTimeout(loop, 50);
   }
 
