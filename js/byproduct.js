@@ -6,7 +6,7 @@ class Byproduct {
         this.element.addClass('byproduct');
         this.element.attr({id: byproductId});
         this.fertile = false;
-        this.incubationPeriod = 1000;
+        this.incubationPeriod = 100;
         this.parentAntityId = undefined;
 
         this.viabilityProbability = 0.01;
@@ -33,7 +33,7 @@ class Byproduct {
         if (currentOpacity <= 0) {
             this.kill();
         } else {
-            this.element.css('opacity', currentOpacity - 0.0005);
+            this.element.css('opacity', currentOpacity - 0.005);
         }
     }
 

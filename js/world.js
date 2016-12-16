@@ -25,19 +25,21 @@ var loopCount = 0;
             antities[i].move();
             antities[i].generateByproduct();
 
-            for( let j = 0; j < antities[i].byproducts.length; j++ ) {
-                if (antities[i].byproducts[j].isAlive) {
-                    if (antities[i].byproducts[j].fertile) {
-                        if (antities[i].byproducts[j].incubationPeriod <= 0) {
-                            antities[i].byproducts[j].hatch();
+            if (loopCount % 10 == 0) {
+                for( let j = 0; j < antities[i].byproducts.length; j++ ) {
+                    if (antities[i].byproducts[j].isAlive) {
+                        if (antities[i].byproducts[j].fertile) {
+                            if (antities[i].byproducts[j].incubationPeriod <= 0) {
+                                antities[i].byproducts[j].hatch();
+                            } else {
+                                antities[i].byproducts[j].incubationPeriod--;
+                            }
                         } else {
-                            antities[i].byproducts[j].incubationPeriod--;
+                            antities[i].byproducts[j].fade();
                         }
                     } else {
-                        antities[i].byproducts[j].fade();
+                        antities[i].byproducts.splice(j, 1);
                     }
-                } else {
-                    antities[i].byproducts.splice(j, 1);
                 }
             }
             if (antities[i].lifespan <= 0) {
