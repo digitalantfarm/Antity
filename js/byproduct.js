@@ -3,12 +3,25 @@ class Byproduct {
         this.element = $('<div />');
         this.element.addClass('byproduct');
         this.element.attr({id: byproductId});
+        this.fertile = false;
+
+        this.viabilityProbability = 0.01;
+
+        this.fertilise();
 
         $('#world').append($(this.element));
     }
 
     setLocation(offset) {
         this.element.offset(offset);
+    }
+
+    fertilise() {
+        const chance = Math.random();
+        if ( chance <= this.viabilityProbability ) {
+            this.fertile = true;
+            this.element.addClass('fertile');
+        }
     }
 
     fade() {

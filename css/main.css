@@ -224,3 +224,9 @@ body {
   /* in order: x offset, y offset, blur size, spread size, color */
   box-shadow: 0 0 3px 1px #fff;
 }
+
+#world .byproduct.fertile {
+  background-color: #f0a;
+  /* in order: x offset, y offset, blur size, spread size, color */
+  box-shadow: 0 0 4px 2px #f0a;
+}
