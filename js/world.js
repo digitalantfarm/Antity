@@ -41,7 +41,7 @@ var antities = new Array();
             }
             if (antities[i].lifespan <= 0) {
                 if (antities.length == 1) {
-                    antities[i].lifespan = 5000;
+                    antities[i].lifespan = 2500;
                 } else {
                     antities[i].kill();
                 }
