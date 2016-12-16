@@ -209,6 +209,7 @@ body {
   height: 1px;
   position: absolute;
 
+  background-color: #0af;
   /* in order: x offset, y offset, blur size, spread size, color */
   box-shadow: 0 0 12px 6px #0af;
 }
@@ -219,6 +220,7 @@ body {
   height: 1px;
   position: absolute;
 
+  background-color: #fff;
   /* in order: x offset, y offset, blur size, spread size, color */
   box-shadow: 0 0 3px 1px #fff;
 }
