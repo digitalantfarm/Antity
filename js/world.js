@@ -18,13 +18,29 @@
 
   function loop() {
     for( let i = 0; i < antities.length; i++) {
-      antities[i].chooseDirection();
-      antities[i].move();
-      antities[i].generateByproduct();
+        if (antities[i].isAlive) {
+            antities[i].chooseDirection();
+            antities[i].move();
+            antities[i].generateByproduct();
 
-      for( let j = 0; j < antities[i].byproducts.length; j++ ) {
-          antities[i].byproducts[j].fade();
-      }
+            for( let j = 0; j < antities[i].byproducts.length; j++ ) {
+                if (antities[i].byproducts[j].isAlive) {
+                    if (antities[i].byproducts[j].fertile) {
+                        if (antities[i].byproducts[j].incubationPeriod <= 0) {
+                            antities[i].byproducts[j].hatch();
+                        } else {
+                            antities[i].byproducts[j].incubationPeriod--;
+                        }
+                    } else {
+                        antities[i].byproducts[j].fade();
+                    }
+                } else {
+                    antities[i].byproducts.splice(j, 1);
+                }
+            }
+        } else {
+            antities.splice(i, 1);
+        }
     }
 
     setTimeout(loop, 50);

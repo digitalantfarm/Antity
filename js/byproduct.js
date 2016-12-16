@@ -1,9 +1,13 @@
 class Byproduct {
     constructor(byproductId) {
+        this.ID = byproductId;
+        this.isAlive = true;
         this.element = $('<div />');
         this.element.addClass('byproduct');
         this.element.attr({id: byproductId});
         this.fertile = false;
+        this.incubationPeriod = 1000;
+        this.parentAntityId = undefined;
 
         this.viabilityProbability = 0.01;
 
@@ -27,9 +31,19 @@ class Byproduct {
     fade() {
         let currentOpacity = this.element.css('opacity');
         if (currentOpacity <= 0) {
-            this.element.remove();
+            this.kill();
         } else {
             this.element.css('opacity', currentOpacity - 0.0005);
         }
+    }
+
+    hatch() {
+        console.log('Hatching at ' + JSON.stringify( this.element.offset() ));
+        this.kill();
+    }
+
+    kill() {
+        this.element.remove();
+        this.isAlive = false;
     }
 }

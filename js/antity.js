@@ -1,5 +1,7 @@
 class Antity {
     constructor(antityId, spawnOffset = {left: 0, top: 0}) {
+        this.ID = antityId;
+        this.isAlive = true;
         this.element = $('<div />');
         this.element.addClass('antity');
         this.element.attr({id: antityId});
@@ -52,13 +54,19 @@ class Antity {
     }
 
     generateByproduct(probability = 0.1) {
-        const chancePoo = Math.random();
-        if ( chancePoo <= probability ) {
+        const chanceByproduct = Math.random();
+        if ( chanceByproduct <= probability ) {
             let coords = this.element.offset();
             let byproductId = 'byproduct-' + this.byproducts.length;
             let newByproduct = new Byproduct(byproductId);
+            newByproduct.parentAntityId = this.ID;
             newByproduct.setLocation({left: coords.left, top: coords.top});
             this.byproducts.push(newByproduct);
         }
+    }
+
+    kill() {
+        this.element.remove();
+        this.isAlive = false;
     }
 }
