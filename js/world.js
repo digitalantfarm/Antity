@@ -19,6 +19,7 @@ var antities = new Array();
   function loop() {
     for( let i = 0; i < antities.length; i++) {
         if (antities[i].isAlive) {
+            antities[i].lifespan--;
             antities[i].chooseDirection();
             antities[i].move();
             antities[i].generateByproduct();
@@ -37,6 +38,9 @@ var antities = new Array();
                 } else {
                     antities[i].byproducts.splice(j, 1);
                 }
+            }
+            if (antities[i].lifespan <= 0) {
+                antities[i].kill();
             }
         } else {
             antities.splice(i, 1);

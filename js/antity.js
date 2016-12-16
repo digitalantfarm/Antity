@@ -2,6 +2,7 @@ class Antity {
     constructor(antityId, spawnOffset = {left: 0, top: 0}) {
         this.ID = antityId;
         this.isAlive = true;
+        this.lifespan = 5000;
         this.element = $('<div />');
         this.element.addClass('antity');
         this.element.attr({id: antityId});
