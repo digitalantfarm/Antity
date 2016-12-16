@@ -40,7 +40,11 @@ var antities = new Array();
                 }
             }
             if (antities[i].lifespan <= 0) {
-                antities[i].kill();
+                if (antities.length == 1) {
+                    antities[i].lifespan = 5000;
+                } else {
+                    antities[i].kill();
+                }
             }
         } else {
             antities.splice(i, 1);
