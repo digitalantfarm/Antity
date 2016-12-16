@@ -33,7 +33,7 @@ class Byproduct {
         if (currentOpacity <= 0) {
             this.kill();
         } else {
-            this.element.css('opacity', currentOpacity - 0.0025);
+            this.element.css('opacity', currentOpacity - 0.0005);
         }
     }
 
