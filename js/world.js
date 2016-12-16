@@ -12,8 +12,7 @@
     }
 
     let antityId = 'antity-' + antities.length;
-    let newAnt = new Antity(antityId);
-    newAnt.setLocation(spawnLocation);
+    let newAnt = new Antity(antityId, spawnLocation);
     antities.push(newAnt);
   }
 
@@ -32,8 +31,8 @@
   }
 
   let starter = {
-    offsetX: $(window).width() / 2,
-    offsetY: $(window).height() / 2
+    offsetX: Math.floor( $(window).width() / 2 ),
+    offsetY: Math.floor( $(window).height() / 2 )
   };
 
   createAntity(starter);
@@ -42,6 +41,6 @@
 
   $(document).click(function(e) {
     createAntity(e);
-    console.log(antities);
+    //console.log(antities);
   });
 }());
