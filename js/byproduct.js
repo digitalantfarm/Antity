@@ -38,7 +38,10 @@ class Byproduct {
     }
 
     hatch() {
-        console.log('Hatching at ' + JSON.stringify( this.element.offset() ));
+        let antityId = 'antity-' + antities.length;
+        let newAnt = new Antity(antityId, this.element.offset());
+        antities.push(newAnt);
+
         this.kill();
     }
 

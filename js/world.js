@@ -1,7 +1,7 @@
+var antities = new Array();
+
 (function() {
   const world = $('#world');
-
-  const antities = new Array();
 
   function createAntity(event = undefined) {
     let spawnLocation = { left: '0px', top: '0px' };
