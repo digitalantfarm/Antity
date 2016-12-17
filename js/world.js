@@ -1,4 +1,5 @@
 var antities = new Array();
+var unitOfTime = 50;
 var loopCount = 0;
 
 (function() {
@@ -55,7 +56,7 @@ var loopCount = 0;
     }
 
     loopCount++;
-    setTimeout(loop, 50);
+    setTimeout(loop, unitOfTime);
   }
 
   let starter = {
