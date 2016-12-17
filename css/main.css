@@ -205,9 +205,11 @@ body {
 
 #world .antity {
   display: inline-block;
-  width: 1px;
-  height: 1px;
+  width: 4px;
+  height: 4px;
   position: absolute;
+
+  border-radius: 2px;
 
   background-color: #0af;
   /* in order: x offset, y offset, blur size, spread size, color */
