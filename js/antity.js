@@ -4,9 +4,11 @@ class Antity {
         this.ID = antityId;
         console.log('Antity ' + this.ID + ' was created.');
         this.isAlive = true;
-        this.lifespan = 2500;
+        this.maxLifespan = 2500;
+        this.lifespan = this.maxLifespan;
         this.element = $('<div />');
         this.element.addClass('antity');
+        this.element.addClass('birth');
         this.element.attr({id: 'antity-' + antityId});
 
         if(spawnOffset === undefined) {
@@ -27,6 +29,9 @@ class Antity {
 
     cycle() {
         if (this.isAlive) {
+            if (this.lifespan == this.maxLifespan) {
+                this.element.removeClass('birth');
+            }
             this.lifespan--;
             this.chooseDirection();
             this.doMove();
@@ -34,7 +39,7 @@ class Antity {
 
             if (this.lifespan <= 0) {
                 if (antities.length == 1) {
-                    this.lifespan = 2500;
+                    this.lifespan = this.maxLifespan;
                 } else {
                     this.kill();
                 }
@@ -98,7 +103,10 @@ class Antity {
 
     kill() {
         console.log('Antity ' + this.ID + ' is now finished.');
-        this.element.remove();
+        this.element.addClass('death');
+        setTimeout(function(that) {
+            that.element.remove();
+        }, 1500, this);
         this.isAlive = false;
     }
 }

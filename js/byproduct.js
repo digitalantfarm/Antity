@@ -80,7 +80,10 @@ class Byproduct {
 
     kill() {
         console.log('Byproduct ' + this.ID + ' is now finished.');
-        this.element.remove();
+        this.element.addClass('death');
+        setTimeout(function(that) {
+            that.element.remove();
+        }, 1500, this);
         this.isAlive = false;
     }
 }
