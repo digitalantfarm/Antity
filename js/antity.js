@@ -2,7 +2,9 @@ class Antity {
     constructor(spawnOffset = undefined) {
         const antityId = antities.length;
         this.ID = antityId;
-        console.log('Antity ' + this.ID + ' was created.');
+        if (debugAntity) {
+            console.log('Antity ' + this.ID + ' was created.');
+        }
         this.isAlive = true;
         this.maxLifespan = 2500;
         this.lifespan = this.maxLifespan;
@@ -96,13 +98,17 @@ class Antity {
         const chanceByproduct = Math.random();
         if ( chanceByproduct <= probability ) {
             let coords = this.element.offset();
-            console.log('Antity ' + this.ID + ' created Byproduct ' + this.byproducts.length + '.');
+            if (debugAntity) {
+                console.log('Antity ' + this.ID + ' created Byproduct ' + this.byproducts.length + '.');
+            }
             this.byproducts.push(new Byproduct(this.ID, {left: coords.left, top: coords.top}));
         }
     }
 
     kill() {
-        console.log('Antity ' + this.ID + ' is now finished.');
+        if (debugAntity) {
+            console.log('Antity ' + this.ID + ' is now finished.');
+        }
         this.element.addClass('death');
         setTimeout(function(that) {
             that.element.remove();

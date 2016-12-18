@@ -1,3 +1,4 @@
+var debugAntity = false;
 var antities = new Array();
 var unitOfTime = 50;
 

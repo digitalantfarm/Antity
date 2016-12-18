@@ -2,7 +2,9 @@ class Byproduct {
     constructor(parentAntityId, spawnLocation = undefined) {
         const byproductId = antities[parentAntityId].byproducts.length;
         this.ID = byproductId;
-        console.log('Byproduct ' + this.ID + ' was created by Antity ' + parentAntityId + '.');
+        if (debugAntity) {
+            console.log('Byproduct ' + this.ID + ' was created by Antity ' + parentAntityId + '.');
+        }
         this.isAlive = true;
         this.element = $('<div />');
         this.element.addClass('byproduct');
@@ -72,14 +74,18 @@ class Byproduct {
     }
 
     hatch() {
-        console.log('Byproduct ' + this.ID + ' hatched into Antity ' + antities.length + '.');
+        if (debugAntity) {
+            console.log('Byproduct ' + this.ID + ' hatched into Antity ' + antities.length + '.');
+        }
         antities.push(new Antity(this.element.offset()));
 
         this.kill();
     }
 
     kill() {
-        console.log('Byproduct ' + this.ID + ' is now finished.');
+        if (debugAntity) {
+            console.log('Byproduct ' + this.ID + ' is now finished.');
+        }
         this.element.addClass('death');
         setTimeout(function(that) {
             that.element.remove();
