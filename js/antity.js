@@ -9,7 +9,7 @@ class Antity {
         this.element.attr({id: 'antity-' + antityId});
 
         if(spawnOffset === undefined) {
-            spawnOffset = {left: '0px', top: '0px'};
+            spawnOffset = {left: 0, top: 0};
         }
 
         this.setLocation(spawnOffset);

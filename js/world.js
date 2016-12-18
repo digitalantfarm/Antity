@@ -5,17 +5,17 @@ var unitOfTime = 50;
   const world = $('#world');
 
   let starter = {
-    offsetX: Math.floor( $(window).width() / 2 ),
-    offsetY: Math.floor( $(window).height() / 2 )
+    left: Math.floor( $(window).width() / 2 ),
+    top: Math.floor( $(window).height() / 2 )
   };
 
   antities.push(new Antity(starter));
 
   $(document).click(function(e) {
-    let spawnLocation = { left: '0px', top: '0px' };
+    let spawnLocation = { left: 0, top: 0 };
 
-    spawnLocation.left = e.offsetX + 'px';
-    spawnLocation.top = e.offsetY + 'px';
+    spawnLocation.left = e.offsetX;
+    spawnLocation.top = e.offsetY;
 
     antities.push(new Antity(spawnLocation));
   });
