@@ -6,7 +6,7 @@ class Antity {
             console.log('Antity ' + this.ID + ' was created.');
         }
         this.isAlive = true;
-        this.maxLifespan = 2500;
+        this.maxLifespan = 1500;
         this.lifespan = this.maxLifespan;
         this.element = $('<div />');
         this.element.addClass('antity');
@@ -41,7 +41,7 @@ class Antity {
 
             if (this.lifespan <= 0) {
                 if (antities.length == 1) {
-                    this.lifespan = this.maxLifespan;
+                    this.lifespan = this.maxLifespan / 10;
                 } else {
                     this.kill();
                 }
