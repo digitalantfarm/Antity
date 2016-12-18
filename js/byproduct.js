@@ -1,19 +1,44 @@
 class Byproduct {
-    constructor(byproductId) {
+    constructor(parentAntityId, spawnLocation = undefined) {
+        const byproductId = antities[parentAntityId].byproducts.length;
         this.ID = byproductId;
         this.isAlive = true;
         this.element = $('<div />');
         this.element.addClass('byproduct');
-        this.element.attr({id: byproductId});
+        this.element.attr({id: 'byproduct-' + byproductId});
         this.fertile = false;
         this.incubationPeriod = 100;
-        this.parentAntityId = undefined;
+        this.parentAntityId = parentAntityId;
 
         this.viabilityProbability = 0.01;
 
         this.fertilise();
 
+        if (spawnLocation !== undefined) {
+            this.setLocation(spawnLocation);
+        }
+
         $('#world').append($(this.element));
+
+        this.cycleInterval = setInterval(function(that) {
+            that.cycle();
+        }, unitOfTime * 5, this);
+    }
+
+    cycle() {
+        if (this.isAlive) {
+            if (this.fertile) {
+                if (this.incubationPeriod <= 0) {
+                    this.hatch();
+                } else {
+                    this.incubationPeriod--;
+                }
+            } else {
+                this.fade();
+            }
+        } else {
+            antities[this.parentAntityId].byproducts.splice(antities[this.parentAntityId].byproducts.indexOf(this.ID), 1);
+        }
     }
 
     setLocation(offset) {
@@ -38,9 +63,7 @@ class Byproduct {
     }
 
     hatch() {
-        let antityId = 'antity-' + antities.length;
-        let newAnt = new Antity(antityId, this.element.offset());
-        antities.push(newAnt);
+        antities.push(new Antity(this.element.offset()));
 
         this.kill();
     }

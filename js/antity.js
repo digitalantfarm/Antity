@@ -1,25 +1,53 @@
 class Antity {
-    constructor(antityId, spawnOffset = {left: 0, top: 0}) {
+    constructor(spawnOffset = undefined) {
+        const antityId = antities.length;
         this.ID = antityId;
         this.isAlive = true;
         this.lifespan = 2500;
         this.element = $('<div />');
         this.element.addClass('antity');
-        this.element.attr({id: antityId});
+        this.element.attr({id: 'antity-' + antityId});
 
-        this.element.css({left: spawnOffset.left, top: spawnOffset.top});
+        if(spawnOffset === undefined) {
+            spawnOffset = {left: '0px', top: '0px'};
+        }
+
+        this.setLocation(spawnOffset);
 
         this.directionModifier = {left: 1, top: 1};
         this.byproducts = [];
 
         $('#world').append($(this.element));
+
+        this.cycleInterval = setInterval(function(that) {
+            that.cycle();
+        }, unitOfTime, this);
+    }
+
+    cycle() {
+        if (this.isAlive) {
+            this.lifespan--;
+            this.chooseDirection();
+            this.doMove();
+            this.generateByproduct();
+
+            if (this.lifespan <= 0) {
+                if (antities.length == 1) {
+                    this.lifespan = 2500;
+                } else {
+                    this.kill();
+                }
+            }
+        } else {
+            antities.splice(antities.indexOf(this), 1);
+        }
     }
 
     setLocation(offset) {
         this.element.offset(offset);
     }
 
-    move() {
+    doMove() {
         let coords = this.element.offset();
         let newOffset = {
             left: coords.left,
@@ -58,11 +86,7 @@ class Antity {
         const chanceByproduct = Math.random();
         if ( chanceByproduct <= probability ) {
             let coords = this.element.offset();
-            let byproductId = 'byproduct-' + this.byproducts.length;
-            let newByproduct = new Byproduct(byproductId);
-            newByproduct.parentAntityId = this.ID;
-            newByproduct.setLocation({left: coords.left, top: coords.top});
-            this.byproducts.push(newByproduct);
+            this.byproducts.push(new Byproduct(this.ID, {left: coords.left, top: coords.top}));
         }
     }
 
