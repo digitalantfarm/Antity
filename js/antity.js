@@ -2,6 +2,7 @@ class Antity {
     constructor(spawnOffset = undefined) {
         const antityId = antities.length;
         this.ID = antityId;
+        console.log('Antity ' + this.ID + ' was created.');
         this.isAlive = true;
         this.lifespan = 2500;
         this.element = $('<div />');
@@ -39,7 +40,11 @@ class Antity {
                 }
             }
         } else {
-            antities.splice(antities.indexOf(this), 1);
+            /*
+            if (this.byproducts.length == 0) {
+                antities.splice(antities.indexOf(this), 1);
+            }
+            */
         }
     }
 
@@ -86,11 +91,13 @@ class Antity {
         const chanceByproduct = Math.random();
         if ( chanceByproduct <= probability ) {
             let coords = this.element.offset();
+            console.log('Antity ' + this.ID + ' created Byproduct ' + this.byproducts.length + '.');
             this.byproducts.push(new Byproduct(this.ID, {left: coords.left, top: coords.top}));
         }
     }
 
     kill() {
+        console.log('Antity ' + this.ID + ' is now finished.');
         this.element.remove();
         this.isAlive = false;
     }
