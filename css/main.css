@@ -204,6 +204,11 @@ body {
 }
 
 #world .antity {
+  backface-visibility: hidden;
+  perspective: 1000;
+  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+
   display: inline-block;
   width: 4px;
   height: 4px;
@@ -230,6 +235,11 @@ body {
 }
 
 #world .byproduct {
+  backface-visibility: hidden;
+  perspective: 1000;
+  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+
   display: inline-block;
   width: 1px;
   height: 1px;
