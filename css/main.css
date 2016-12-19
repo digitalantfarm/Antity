@@ -221,7 +221,7 @@ body {
   box-shadow: 0 0 12px 6px #0af;
   opacity: 1;
 
-  transition: box-shadow 1s, opacity 1s, top 0.1s, left 0.1s;
+  transition: box-shadow 1s, opacity 1s, top 0.05s, left 0.05s;
 }
 
 #world .antity.birth {
@@ -250,7 +250,7 @@ body {
   box-shadow: 0 0 3px 1px #fff;
   opacity: 1;
 
-  transition: box-shadow 1s, opacity 1s, top 0.1s, left 0.1s;
+  transition: box-shadow 1s, opacity 1s, top 0.05s, left 0.05s;
 }
 
 #world .byproduct.fertile {
