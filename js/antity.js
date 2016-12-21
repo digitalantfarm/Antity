@@ -61,8 +61,6 @@ class Antity {
       left: coords.left,
       top: coords.top
     };
-    //let worldWidth = $(window).width();
-    //let worldHeight = $(window).height();
 
     if ((coords.left + this.directionModifier.left) < 0 || (coords.left + this.directionModifier.left) > this.options.dimensions.width) {
       newOffset.left = coords.left - this.directionModifier.left;

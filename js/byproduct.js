@@ -7,6 +7,8 @@ class Byproduct {
     }
     this.isAlive = true;
     this.offset = spawnLocation;
+    this.opacity = 1;
+    this.fadeStep = 0.005;
     this.fertile = false;
     this.incubationPeriod = 100;
 
@@ -17,6 +19,10 @@ class Byproduct {
     this.cycleInterval = setInterval(function (that) {
       that.cycle();
     }, unitOfTime * 5, this);
+
+    if (this.fertile) {
+      console.log('Laid an egg!');
+    }
 
     this.action = 'createByproduct';
     postMessage(this);
@@ -54,19 +60,18 @@ class Byproduct {
     const chance = Math.random();
     if (chance <= this.viabilityProbability) {
       this.fertile = true;
-      //this.element.addClass('fertile');
     }
   }
 
   fade() {
-    /*
-    let currentOpacity = this.element.css('opacity');
-    if (currentOpacity <= 0) {
-      this.kill();
+    if (this.opacity <= 0) {
+      //this.kill();
     } else {
-      this.element.css('opacity', currentOpacity - 0.005);
+      this.action = 'fadeByproduct';
+      this.opacity = this.opacity - this.fadeStep;
     }
-    */
+
+    postMessage(this);
   }
 
   hatch() {

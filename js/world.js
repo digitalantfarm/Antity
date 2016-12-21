@@ -47,10 +47,18 @@ class World {
     let newElement = $('<div />');
     newElement.attr({id: 'byproduct-' + elementObject.ID});
     newElement.addClass('byproduct');
+    if (elementObject.fertile) {
+      newElement.addClass('fertile');
+    }
     newElement.offset(elementObject.offset);
 
     this.elements[elementObject.ID] = newElement;
     $('#world').append(this.elements[elementObject.ID]);
+  }
+
+  fadeByproduct(elementObject) {
+    let el = $('#byproduct-' + elementObject.ID);
+    el.css({opacity: elementObject.opacity});
   }
 
   listener(e) {
@@ -63,6 +71,9 @@ class World {
         break;
       case 'createByproduct':
         world.addByproduct(e.data);
+        break;
+      case 'fadeByproduct':
+        world.fadeByproduct(e.data);
         break;
     }
   }

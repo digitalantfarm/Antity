@@ -222,6 +222,9 @@ body {
 }
 
 #world .byproduct.fertile {
+    width: 2px;
+    height: 2px;
+    border-radius: 2px;
     background-color: #d03;
     /* in order: x offset, y offset, blur size, spread size, color */
     box-shadow: 0 0 4px 2px #d03;
