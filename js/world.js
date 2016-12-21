@@ -12,18 +12,24 @@ class World {
     this.startWorker();
   }
 
-  startWorker() {
+  startWorker(spawnLocation = undefined) {
     let workerID = uuid.v4();
-    this.workers[workerID] = new Worker(this.workerScript);
-    this.workers[workerID].postMessage({
+    let options = {
       action: 'createAntity',
       ID: workerID,
-      offset: {
+      offset: {},
+      dimensions: this.dimensions
+    };
+    if (spawnLocation === undefined) {
+      options.offset = {
         left: Math.floor($(window).width() / 2),
         top: Math.floor($(window).height() / 2)
-      },
-      dimensions: this.dimensions
-    });
+      };
+    } else {
+      options.offset = spawnLocation;
+    }
+    this.workers[workerID] = new Worker(this.workerScript);
+    this.workers[workerID].postMessage(options);
     this.workers[workerID].onmessage = this.listener;
   }
 
@@ -80,3 +86,15 @@ class World {
 }
 
 var world = new World('js/worker.js');
+
+/*
+$(document).click(function(e) {
+  let spawnLocation = { left: 0, top: 0 };
+
+  spawnLocation.left = e.offsetX;
+  spawnLocation.top = e.offsetY;
+
+  //antities.push(new Antity(spawnLocation));
+  world.startWorker(spawnLocation);
+});
+*/

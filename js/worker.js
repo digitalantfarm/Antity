@@ -26,14 +26,3 @@ function createAntity(data) {
   antity = new Antity(data);
   console.log(antity);
 }
-
-/*
-$(document).click(function(e) {
-  let spawnLocation = { left: 0, top: 0 };
-
-  spawnLocation.left = e.offsetX;
-  spawnLocation.top = e.offsetY;
-
-  antities.push(new Antity(spawnLocation));
-});
-*/
