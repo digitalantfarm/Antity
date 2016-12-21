@@ -1,23 +1,42 @@
-var debugAntity = false;
-var antities = new Array();
-var unitOfTime = 50;
+class World {
+  constructor(workerScript) {
+    this.workerScript = workerScript;
+    this.unitOfTime = 50;
+    this.workers = {};
+    this.elements = {};
+    this.dimensions = {
+      width: $(window).width(),
+      height: $(window).height()
+    };
 
-(function() {
-  const world = $('#world');
+    this.startWorker();
+  }
 
-  let starter = {
-    left: Math.floor( $(window).width() / 2 ),
-    top: Math.floor( $(window).height() / 2 )
-  };
+  startWorker() {
+    let workerID = uuid.v4();
+    this.workers[workerID] = new Worker(this.workerScript);
+    this.workers[workerID].postMessage({
+      action: 'createElement',
+      ID: workerID,
+      offset: {
+        left: Math.floor($(window).width() / 2),
+        top: Math.floor($(window).height() / 2)
+      },
+      dimensions: this.dimensions
+    });
+    this.workers[workerID].onmessage = this.listener;
+  }
 
-  antities.push(new Antity(starter));
+  doCreateElement(elementObject) {
+    this.elements[elementObject.ID] = $('<div />');
+    $('#world').append(this.elements[elementObject.ID]);
+  }
 
-  $(document).click(function(e) {
-    let spawnLocation = { left: 0, top: 0 };
+  listener(e) {
+    if (e.data.action == 'createElement') {
+      world.doCreateElement(e.data);
+    }
+  }
+}
 
-    spawnLocation.left = e.offsetX;
-    spawnLocation.top = e.offsetY;
-
-    antities.push(new Antity(spawnLocation));
-  });
-}());
+var world = new World('js/worker.js');

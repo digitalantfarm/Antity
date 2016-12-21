@@ -57,33 +57,17 @@ textarea {
    ========================================================================== */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ==========================================================================
    Media Queries
    ========================================================================== */
 
-@media only screen and (min-width: 35em) {
-
-}
+@media only screen and (min-width: 35em) {}
 
 @media print,
-       (-o-min-device-pixel-ratio: 5/4),
-       (-webkit-min-device-pixel-ratio: 1.25),
-       (min-resolution: 120dpi) {
+(-o-min-device-pixel-ratio: 5/4),
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 120dpi) {}
 
-}
 
 /* ==========================================================================
    Helper classes
@@ -133,6 +117,7 @@ textarea {
     *zoom: 1;
 }
 
+
 /* ==========================================================================
    Print styles
    ========================================================================== */
@@ -146,51 +131,41 @@ textarea {
         box-shadow: none !important;
         text-shadow: none !important;
     }
-
     a,
     a:visited {
         text-decoration: underline;
     }
-
     a[href]:after {
         content: " (" attr(href) ")";
     }
-
     abbr[title]:after {
         content: " (" attr(title) ")";
     }
-
     a[href^="#"]:after,
     a[href^="javascript:"]:after {
         content: "";
     }
-
     pre,
     blockquote {
         border: 1px solid #999;
         page-break-inside: avoid;
     }
-
     thead {
         display: table-header-group;
     }
-
     tr,
     img {
         page-break-inside: avoid;
     }
-
     img {
         max-width: 100% !important;
     }
-
     p,
     h2,
     h3 {
         orphans: 3;
         widows: 3;
     }
-
     h2,
     h3 {
         page-break-after: avoid;
@@ -198,30 +173,26 @@ textarea {
 }
 
 body {
-  background-color: #111;
-  margin: 0;
-  padding: 0;
+    background-color: #111;
+    margin: 0;
+    padding: 0;
 }
 
 #world .antity {
-  backface-visibility: hidden;
-  perspective: 1000;
-  transform: translateZ(0);
-  transform: translate3d(0, 0, 0);
-
-  display: inline-block;
-  width: 4px;
-  height: 4px;
-  position: absolute;
-
-  border-radius: 2px;
-
-  background-color: #0af;
-  /* in order: x offset, y offset, blur size, spread size, color */
-  box-shadow: 0 0 12px 6px #0af;
-  opacity: 1;
-
-  transition: box-shadow 1s, opacity 1s, top 0.05s, left 0.05s;
+    backface-visibility: hidden;
+    perspective: 1000;
+    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    position: absolute;
+    border-radius: 2px;
+    background-color: #0af;
+    /* in order: x offset, y offset, blur size, spread size, color */
+    box-shadow: 0 0 12px 6px #0af;
+    opacity: 1;
+    transition: box-shadow 1s, opacity 1s, top 0.05s, left 0.05s;
 }
 
 #world .antity.birth {
@@ -235,28 +206,25 @@ body {
 }
 
 #world .byproduct {
-  backface-visibility: hidden;
-  perspective: 1000;
-  transform: translateZ(0);
-  transform: translate3d(0, 0, 0);
-
-  display: inline-block;
-  width: 1px;
-  height: 1px;
-  position: absolute;
-
-  background-color: #fff;
-  /* in order: x offset, y offset, blur size, spread size, color */
-  box-shadow: 0 0 3px 1px #fff;
-  opacity: 1;
-
-  transition: box-shadow 1s, opacity 1s, top 0.05s, left 0.05s;
+    backface-visibility: hidden;
+    perspective: 1000;
+    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
+    display: inline-block;
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    background-color: #fff;
+    /* in order: x offset, y offset, blur size, spread size, color */
+    box-shadow: 0 0 3px 1px #fff;
+    opacity: 1;
+    transition: box-shadow 1s, opacity 1s, top 0.05s, left 0.05s;
 }
 
 #world .byproduct.fertile {
-  background-color: #f0a;
-  /* in order: x offset, y offset, blur size, spread size, color */
-  box-shadow: 0 0 4px 2px #f0a;
+    background-color: #f0a;
+    /* in order: x offset, y offset, blur size, spread size, color */
+    box-shadow: 0 0 4px 2px #f0a;
 }
 
 #world .byproduct.fertile.death {
