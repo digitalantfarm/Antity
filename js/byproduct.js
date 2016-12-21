@@ -1,17 +1,11 @@
 class Byproduct {
   constructor(byproductId, parentAntityId, spawnLocation = undefined) {
     this.ID = byproductId;
-    //console.log(this.ID);
     this.parentAntityId = parentAntityId;
     if (debugAntity) {
       console.log('Byproduct ' + this.ID + ' was created by Antity ' + parentAntityId + '.');
     }
     this.isAlive = true;
-    //this.element = $('<div />');
-    //this.element.addClass('byproduct');
-    //this.element.attr({
-    //  id: 'byproduct-' + byproductId
-    //});
     this.offset = spawnLocation;
     this.fertile = false;
     this.incubationPeriod = 100;
@@ -19,12 +13,6 @@ class Byproduct {
     this.viabilityProbability = 0.01;
 
     this.fertilise();
-
-    //if (spawnLocation !== undefined) {
-    //  this.setLocation(spawnLocation);
-    //}
-
-    //$('#world').append($(this.element));
 
     this.cycleInterval = setInterval(function (that) {
       that.cycle();
