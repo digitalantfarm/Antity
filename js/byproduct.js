@@ -1,33 +1,37 @@
 class Byproduct {
-  constructor(parentAntityId, spawnLocation = undefined) {
-    const byproductId = antities[parentAntityId].byproducts.length;
+  constructor(byproductId, parentAntityId, spawnLocation = undefined) {
     this.ID = byproductId;
+    //console.log(this.ID);
+    this.parentAntityId = parentAntityId;
     if (debugAntity) {
       console.log('Byproduct ' + this.ID + ' was created by Antity ' + parentAntityId + '.');
     }
     this.isAlive = true;
-    this.element = $('<div />');
-    this.element.addClass('byproduct');
-    this.element.attr({
-      id: 'byproduct-' + byproductId
-    });
+    //this.element = $('<div />');
+    //this.element.addClass('byproduct');
+    //this.element.attr({
+    //  id: 'byproduct-' + byproductId
+    //});
+    this.offset = spawnLocation;
     this.fertile = false;
     this.incubationPeriod = 100;
-    this.parentAntityId = parentAntityId;
 
     this.viabilityProbability = 0.01;
 
     this.fertilise();
 
-    if (spawnLocation !== undefined) {
-      this.setLocation(spawnLocation);
-    }
+    //if (spawnLocation !== undefined) {
+    //  this.setLocation(spawnLocation);
+    //}
 
-    $('#world').append($(this.element));
+    //$('#world').append($(this.element));
 
     this.cycleInterval = setInterval(function (that) {
       that.cycle();
     }, unitOfTime * 5, this);
+
+    this.action = 'createByproduct';
+    postMessage(this);
   }
 
   cycle() {
@@ -62,26 +66,28 @@ class Byproduct {
     const chance = Math.random();
     if (chance <= this.viabilityProbability) {
       this.fertile = true;
-      this.element.addClass('fertile');
+      //this.element.addClass('fertile');
     }
   }
 
   fade() {
+    /*
     let currentOpacity = this.element.css('opacity');
     if (currentOpacity <= 0) {
       this.kill();
     } else {
       this.element.css('opacity', currentOpacity - 0.005);
     }
+    */
   }
 
   hatch() {
     if (debugAntity) {
       console.log('Byproduct ' + this.ID + ' hatched into Antity ' + antities.length + '.');
     }
-    antities.push(new Antity(this.element.offset()));
+    //antities.push(new Antity(this.element.offset()));
 
-    this.kill();
+    //this.kill();
   }
 
   kill() {

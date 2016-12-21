@@ -222,12 +222,12 @@ body {
 }
 
 #world .byproduct.fertile {
-    background-color: #f0a;
+    background-color: #d03;
     /* in order: x offset, y offset, blur size, spread size, color */
-    box-shadow: 0 0 4px 2px #f0a;
+    box-shadow: 0 0 4px 2px #d03;
 }
 
 #world .byproduct.fertile.death {
-    box-shadow: 0 0 16px 8px #f0a;
+    box-shadow: 0 0 16px 8px #d03;
     opacity: 0;
 }

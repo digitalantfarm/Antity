@@ -14,20 +14,11 @@ class Antity {
       top: 0
     };
 
-    //this.element = $('<div />');
-    //this.element.addClass('antity');
-    //this.element.addClass('birth');
-    //this.element.attr({id: 'antity-' + antityId});
-
-    //this.setLocation(spawnOffset);
-
     this.directionModifier = {
       left: 1,
       top: 1
     };
-    this.byproducts = [];
-
-    //$('#world').append($(this.element));
+    this.byproducts = {};
 
     this.cycleInterval = setInterval(function (that) {
       that.cycle();
@@ -42,14 +33,16 @@ class Antity {
       this.lifespan--;
       this.chooseDirection();
       this.doMove();
-      //this.generateByproduct();
+      this.generateByproduct();
 
       if (this.lifespan <= 0) {
+        /*
         if (antities.length == 1) {
           this.lifespan = this.maxLifespan / 10;
         } else {
           this.kill();
         }
+        */
       }
     } else {
       /*
@@ -58,11 +51,8 @@ class Antity {
       }
       */
     }
-
-  }
-
-  setLocation(offset) {
-    this.element.offset(offset);
+    //this.action = 'cycle';
+    //postMessage(this);
   }
 
   doMove() {
@@ -87,6 +77,8 @@ class Antity {
     }
 
     this.offset = newOffset;
+    this.action = 'moveAntity';
+    postMessage(this);
   }
 
   chooseDirection(probability = 0.1) {
@@ -103,14 +95,11 @@ class Antity {
   generateByproduct(probability = 0.1) {
     const chanceByproduct = Math.random();
     if (chanceByproduct <= probability) {
-      let coords = this.offset;
       if (debugAntity) {
         console.log('Antity ' + this.ID + ' created Byproduct ' + this.byproducts.length + '.');
       }
-      this.byproducts.push(new Byproduct(this.ID, {
-        left: coords.left,
-        top: coords.top
-      }));
+      let byproductId = uuid.v4();
+      this.byproducts[byproductId] = new Byproduct(byproductId, this.ID, this.offset);
     }
   }
 

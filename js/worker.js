@@ -13,7 +13,7 @@ let antity = 'world';
 onmessage = function (e) {
   if (typeof e.data == 'object' && e.data.action) {
     switch (e.data.action) {
-      case 'createElement':
+      case 'createAntity':
         createAntity(e.data);
         postMessage(e.data);
         break;
