@@ -49,6 +49,14 @@ class World {
     el.offset(elementObject.offset);
   }
 
+  killAntity(elementObject) {
+    if (!elementObject.isAlive) {
+      $('#antity-' + elementObject.ID).remove();
+      console.log('Antity dead.');
+      this.workers[elementObject.ID].postMessage(elementObject);
+    }
+  }
+
   addByproduct(elementObject) {
     let newElement = $('<div />');
     newElement.attr({id: 'byproduct-' + elementObject.ID});
@@ -67,6 +75,13 @@ class World {
     el.css({opacity: elementObject.opacity});
   }
 
+  killByproduct(elementObject) {
+    if (!elementObject.isAlive) {
+      $('#byproduct-' + elementObject.ID).remove();
+      this.workers[elementObject.parentAntityId].postMessage(elementObject);
+    }
+  }
+
   listener(e) {
     switch(e.data.action) {
       case 'createAntity':
@@ -75,11 +90,21 @@ class World {
       case 'moveAntity':
         world.moveAntity(e.data);
         break;
+      case 'killAntity':
+        world.killAntity(e.data);
+        break;
       case 'createByproduct':
         world.addByproduct(e.data);
         break;
       case 'fadeByproduct':
         world.fadeByproduct(e.data);
+        break;
+      case 'hatchByproduct':
+        console.log('Hatching!');
+        world.startWorker(e.data.offset);
+        break;
+      case 'killByproduct':
+        world.killByproduct(e.data);
         break;
     }
   }

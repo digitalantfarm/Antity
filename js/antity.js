@@ -40,7 +40,9 @@ class Antity {
         if (antities.length == 1) {
           this.lifespan = this.maxLifespan / 10;
         } else {
+          */
           this.kill();
+          /*
         }
         */
       }
@@ -105,10 +107,8 @@ class Antity {
     if (debugAntity) {
       console.log('Antity ' + this.ID + ' is now finished.');
     }
-    this.element.addClass('death');
-    setTimeout(function (that) {
-      that.element.remove();
-    }, 1500, this);
     this.isAlive = false;
+    this.action = 'killAntity';
+    postMessage(this);
   }
 }

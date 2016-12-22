@@ -17,6 +17,11 @@ onmessage = function (e) {
         createAntity(e.data);
         postMessage(e.data);
         break;
+      case 'killAntity':
+        this.close();
+      case 'killByproduct':
+        delete antity.byproducts[e.data.ID];
+        break;
     }
   }
 };

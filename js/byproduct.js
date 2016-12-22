@@ -65,7 +65,7 @@ class Byproduct {
 
   fade() {
     if (this.opacity <= 0) {
-      //this.kill();
+      this.kill();
     } else {
       this.action = 'fadeByproduct';
       this.opacity = this.opacity - this.fadeStep;
@@ -78,19 +78,19 @@ class Byproduct {
     if (debugAntity) {
       console.log('Byproduct ' + this.ID + ' hatched into Antity ' + antities.length + '.');
     }
-    //antities.push(new Antity(this.element.offset()));
 
-    //this.kill();
+    this.action = 'hatchByproduct';
+    postMessage(this);
+
+    this.kill();
   }
 
   kill() {
     if (debugAntity) {
       console.log('Byproduct ' + this.ID + ' is now finished.');
     }
-    this.element.addClass('death');
-    setTimeout(function (that) {
-      that.element.remove();
-    }, 1500, this);
     this.isAlive = false;
+    this.action = 'killByproduct';
+    postMessage(this);
   }
 }
