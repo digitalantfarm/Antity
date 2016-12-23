@@ -6,6 +6,7 @@ let Container = PIXI.Container
   , Sprite = PIXI.Sprite
   , Graphics = PIXI.Graphics
   , TextureCache = PIXI.utils.TextureCache
+  , Rectangle = PIXI.Rectangle
   , BlurFilter = PIXI.filters.BlurFilter;
 
 class World {
@@ -20,9 +21,7 @@ class World {
     };
 
     loader
-      .add('img/antity-sprite.png')
-      .add('img/byproduct-sprite.png')
-      .add('img/byproduct-fertile-sprite.png')
+      .add('img/antity-spritesheet.png')
       .load(this.createWorld.bind(this));
   }
 
@@ -69,8 +68,9 @@ class World {
 
   addAntity(elementObject) {
     let aColor = 0x00aaff;
-    //let aTexture = TextureCache['img/antity-sprite.png'];
-    let aTexture = resources['img/antity-sprite.png'].texture
+    let aTexture = TextureCache['img/antity-spritesheet.png'];
+    let aRectangle = new Rectangle(0, 0, 32, 32);
+    aTexture.frame = aRectangle;
     let antity = new Sprite(aTexture);
     antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
 
@@ -96,17 +96,17 @@ class World {
     let bpBlur = 1;
     let bpColor = 0xffffff;
     let bpScale = 0.75;
-    //let bpTexture = TextureCache['img/byproduct-sprite.png'];
-    let bpTexture = resources['img/byproduct-sprite.png'].texture
+    let bpTexture = TextureCache['img/antity-spritesheet.png'];
+    let bpRectangle = new Rectangle(32, 24, 16, 16);
 
     if (elementObject.fertile) {
       bpBlur = 2;
       bpColor = 0x00dd33;
       bpScale = 1;
-      //bpTexture = TextureCache['img/byproduct-fertile-sprite.png'];
-      bpTexture = resources['img/byproduct-fertile-sprite.png'].texture
+      bpRectangle = new Rectangle(32, 0, 24, 24);
     }
 
+    bpTexture.frame = bpRectangle;
     let byproduct = new Sprite(bpTexture);
     byproduct.scale.set(bpScale, bpScale);
     byproduct.position.set(elementObject.offset.left - (byproduct.width / 2), elementObject.offset.top - (byproduct.height / 2));
