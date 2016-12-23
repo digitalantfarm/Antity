@@ -1,15 +1,76 @@
+let Container = PIXI.Container
+  , autoDetectRenderer = PIXI.autoDetectRenderer
+  , loader = PIXI.loader
+  , resources = PIXI.loader.resources
+  , Sprite = PIXI.Sprite
+  , Graphics = PIXI.Graphics
+  , BlurFilter = PIXI.filters.BlurFilter;
+
 class World {
-  constructor(workerScript) {
-    this.workerScript = workerScript;
-    this.unitOfTime = 50;
-    this.workers = {};
+  constructor() {
+    this.unitOfTime = 1000 / 60;
+    this.antities = {};
     this.elements = {};
     this.dimensions = {
       width: $(window).width(),
       height: $(window).height()
     };
 
-    this.startWorker();
+    this.createWorld();
+  }
+
+  createWorld() {
+    this.renderer = new autoDetectRenderer(this.dimensions.width, this.dimensions.height, {
+      antialias: true,
+      transparent: false,
+      resolution: 1
+    });
+    this.renderer.backgroundColor = 0x111111;
+    document.body.appendChild(this.renderer.view);
+
+    this.stage = new Container();
+
+    let antity = new Graphics();
+    antity.beginFill(0x00aaff);
+    antity.lineStyle(1,0x00aaff, 1);
+    antity.drawCircle(0, 0, 4);
+    antity.endFill();
+    antity.position.set(this.dimensions.width / 2, this.dimensions.height / 2);
+    let antityBlur = new BlurFilter();
+    antityBlur.blur = 3;
+    antity.filters = [antityBlur];
+
+    antity.scale.x = 2;
+    antity.scale.y = 2;
+
+    this.antity = antity;
+
+    this.stage.addChild(this.antity);
+
+    let byproduct = new Graphics();
+    byproduct.beginFill(0xffffff);
+    byproduct.lineStyle(1,0xffffff, 1);
+    byproduct.drawCircle(0, 0, 2);
+    byproduct.endFill();
+    byproduct.position.set(this.dimensions.width / 2, this.dimensions.height / 2);
+    let byproductBlur = new BlurFilter();
+    byproductBlur.blur = 1;
+    byproduct.filters = [byproductBlur];
+
+    this.byproduct = byproduct;
+
+    this.stage.addChild(this.byproduct);
+
+    this.animate();
+  }
+
+  animate() {
+    requestAnimationFrame(this.animate.bind(this));
+
+    this.antity.position.x -= 0.5;
+    this.antity.position.y -= 0.5;
+
+    this.renderer.render(this.stage);
   }
 
   startWorker(spawnLocation = undefined) {
