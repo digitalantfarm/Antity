@@ -1,9 +1,11 @@
 let Container = PIXI.Container
+  , ParticleContainer = PIXI.ParticleContainer
   , autoDetectRenderer = PIXI.autoDetectRenderer
   , loader = PIXI.loader
   , resources = PIXI.loader.resources
   , Sprite = PIXI.Sprite
   , Graphics = PIXI.Graphics
+  , TextureCache = PIXI.utils.TextureCache
   , BlurFilter = PIXI.filters.BlurFilter;
 
 class World {
@@ -17,9 +19,11 @@ class World {
       height: $(window).height()
     };
 
-    this.createWorld();
-
-    this.startWorker();
+    loader
+      .add('img/antity-sprite.png')
+      .add('img/byproduct-sprite.png')
+      .add('img/byproduct-fertile-sprite.png')
+      .load(this.createWorld.bind(this));
   }
 
   createWorld() {
@@ -31,9 +35,10 @@ class World {
     this.renderer.backgroundColor = 0x111111;
     document.body.appendChild(this.renderer.view);
 
-    this.stage = new Container();
+    this.stage = new ParticleContainer();
 
     this.animate();
+    this.startWorker();
   }
 
   animate() {
@@ -63,15 +68,11 @@ class World {
   }
 
   addAntity(elementObject) {
-    let antity = new Graphics();
-    antity.beginFill(0x00aaff);
-    antity.lineStyle(1,0x00aaff, 1);
-    antity.drawCircle(0, 0, 8);
-    antity.endFill();
-    antity.position.set(elementObject.offset.left, elementObject.offset.top);
-    let antityBlur = new BlurFilter();
-    antityBlur.blur = 3;
-    antity.filters = [antityBlur];
+    let aColor = 0x00aaff;
+    //let aTexture = TextureCache['img/antity-sprite.png'];
+    let aTexture = resources['img/antity-sprite.png'].texture
+    let antity = new Sprite(aTexture);
+    antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
 
     this.sprites[elementObject.ID] = antity;
 
@@ -79,7 +80,8 @@ class World {
   }
 
   moveAntity(elementObject) {
-    this.sprites[elementObject.ID].position.set(elementObject.offset.left, elementObject.offset.top);
+    let antity = this.sprites[elementObject.ID];
+    antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
   }
 
   killAntity(elementObject) {
@@ -91,18 +93,23 @@ class World {
   }
 
   addByproduct(elementObject) {
-    let byproduct = new Graphics();
-    byproduct.beginFill(0xffffff);
-    byproduct.lineStyle(1,0xffffff, 1);
-    byproduct.drawCircle(0, 0, 2);
-    byproduct.endFill();
-    byproduct.position.set(elementObject.offset.left, elementObject.offset.top);
-    let byproductBlur = new BlurFilter();
-    byproductBlur.blur = 1;
-    byproduct.filters = [byproductBlur];
+    let bpBlur = 1;
+    let bpColor = 0xffffff;
+    let bpScale = 0.75;
+    //let bpTexture = TextureCache['img/byproduct-sprite.png'];
+    let bpTexture = resources['img/byproduct-sprite.png'].texture
+
     if (elementObject.fertile) {
-      byproduct.tint = 0xdd0033;
+      bpBlur = 2;
+      bpColor = 0x00dd33;
+      bpScale = 1;
+      //bpTexture = TextureCache['img/byproduct-fertile-sprite.png'];
+      bpTexture = resources['img/byproduct-fertile-sprite.png'].texture
     }
+
+    let byproduct = new Sprite(bpTexture);
+    byproduct.scale.set(bpScale, bpScale);
+    byproduct.position.set(elementObject.offset.left - (byproduct.width / 2), elementObject.offset.top - (byproduct.height / 2));
 
     this.sprites[elementObject.ID] = byproduct;
 
@@ -159,4 +166,6 @@ function click2create() {
 
     world.startWorker(spawnLocation);
   });
+
+  return 'You can now click anywhere on the page to create more Antities.';
 }
