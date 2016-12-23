@@ -33,15 +33,12 @@ class World {
     let antity = new Graphics();
     antity.beginFill(0x00aaff);
     antity.lineStyle(1,0x00aaff, 1);
-    antity.drawCircle(0, 0, 4);
+    antity.drawCircle(0, 0, 8);
     antity.endFill();
     antity.position.set(this.dimensions.width / 2, this.dimensions.height / 2);
     let antityBlur = new BlurFilter();
     antityBlur.blur = 3;
     antity.filters = [antityBlur];
-
-    antity.scale.x = 2;
-    antity.scale.y = 2;
 
     this.antity = antity;
 
