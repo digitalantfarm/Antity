@@ -172,10 +172,26 @@ textarea {
     }
 }
 
+* {
+    padding: 0;
+    margin: 0;
+}
+
 body {
     background-color: #111;
     margin: 0;
     padding: 0;
+}
+
+h1 {
+    position: absolute;
+    left: 50px;
+    top: 25px;
+    z-index: 1000;
+}
+
+#world {
+    z-index: 10;
 }
 
 #world .antity {
