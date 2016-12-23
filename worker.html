@@ -1,0 +1,88 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <title>Antity</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <link rel="stylesheet" href="css/normalize.min.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <h1>Antity</h1>
+
+        <div id="world"></div>
+
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+        <script src="js/vendor/uuid.js"></script>
+        <script>
+            const workerScript = 'js/worker.js';
+
+            let universe = {};
+            universe.workers = {};
+            universe.antities = {};
+
+            let workerID = uuid.v4();
+            universe.workers[workerID] = startWorker(workerID, workerScript);
+            universe.workers[workerID].onmessage = function(e) {
+                let dd = $('<div />');
+                dd.html(e.data.message);
+                $('body').append(dd);
+
+                console.log(e.data.message);
+            }
+            //let worker01 = new Worker('js/worker.js');
+
+            //worker01.postMessage('doWork');
+
+            //worker01.onmessage = function(e) {
+            //    console.log(e.data);
+            //};
+
+            console.log(universe);
+            console.log('Workers ' + universe.workers.length);
+
+            function startWorker(workerID, workerScript) {
+                let worker = new Worker(workerScript);
+                worker.postMessage({
+                    action: 'create',
+                    id: workerID,
+                    offset: {
+                        left: Math.floor( $(window).width() / 2 ),
+                        top: Math.floor( $(window).height() / 2 )
+                    }
+                });
+                return worker;
+            }
+
+            /*
+            var debugAntity = false;
+            var antities = new Array();
+            var unitOfTime = 50;
+
+            (function() {
+            const world = $('#world');
+
+            let starter = {
+                left: Math.floor( $(window).width() / 2 ),
+                top: Math.floor( $(window).height() / 2 )
+            };
+
+            antities.push(new Antity(starter));
+
+            $(document).click(function(e) {
+                let spawnLocation = { left: 0, top: 0 };
+
+                spawnLocation.left = e.offsetX;
+                spawnLocation.top = e.offsetY;
+
+                antities.push(new Antity(spawnLocation));
+            });
+            }());
+            */
+        </script>
+    </body>
+</html>
