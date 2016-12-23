@@ -1,0 +1,94 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Antity - Pixi</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <link rel="stylesheet" href="css/normalize.min.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+
+    <body>
+        <h1>Antity</h1>
+        <script src="js/vendor/pixi.min.js"></script>
+        <script>
+            window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')
+        </script>
+        <!--<script src="js/byproduct.js"></script>-->
+        <!--<script src="js/antity.js"></script>-->
+        <!--<script src="js/vendor/uuid.js"></script>-->
+        <!--<script src="js/world.js"></script>-->
+        <script>
+        let Container = PIXI.Container
+          , autoDetectRenderer = PIXI.autoDetectRenderer
+          , loader = PIXI.loader
+          , resources = PIXI.loader.resources
+          , Sprite = PIXI.Sprite
+          , Graphics = PIXI.Graphics
+          , BlurFilter = PIXI.filters.BlurFilter;
+
+        let stageWidth = $(window).width();
+        let stageHeight = $(window).height();
+        let renderer = new autoDetectRenderer(stageWidth, stageHeight, {
+            antialias: true,
+            transparent: false,
+            resolution: 1
+        });
+        renderer.backgroundColor = 0x111111;
+        document.body.appendChild(renderer.view);
+
+        let stage = new Container();
+
+        let antity = null;
+        let byproduct = null;
+
+        function setup(loader, resources) {
+
+            antity = new Graphics();
+            antity.beginFill(0x00aaff);
+            antity.lineStyle(1,0x00aaff, 1);
+            antity.drawCircle(0, 0, 4);
+            antity.endFill();
+            antity.position.set(stageWidth / 2, stageHeight / 2);
+            let antityBlur = new BlurFilter();
+            antityBlur.blur = 3;
+            antity.filters = [antityBlur];
+
+            antity.scale.x = 2;
+            antity.scale.y = 2;
+
+            stage.addChild(antity);
+
+            byproduct = new Graphics();
+            byproduct.beginFill(0xffffff);
+            byproduct.lineStyle(1,0xffffff, 1);
+            byproduct.drawCircle(0, 0, 2);
+            byproduct.endFill();
+            byproduct.position.set(stageWidth / 2, stageHeight / 2);
+            let byproductBlur = new BlurFilter();
+            byproductBlur.blur = 1;
+            byproduct.filters = [byproductBlur];
+
+            stage.addChild(byproduct);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            antity.position.x -= 0.5;
+            antity.position.y -= 0.5;
+
+            renderer.render(stage);
+        }
+
+        setup();
+        </script>
+    </body>
+
+</html>
