@@ -89,7 +89,7 @@ class World {
       this.stage.removeChild(this.sprites[elementObject.ID]);
       console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
-      delete this.workers[elementObject.ID];
+      //delete this.workers[elementObject.ID];
     }
     if (this.antityCount() < 1) {
       console.log('Resurrection!');
