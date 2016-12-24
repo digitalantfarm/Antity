@@ -64,8 +64,6 @@ class World {
     this.workers[workerID] = new Worker(this.workerScript);
     this.workers[workerID].postMessage(options);
     this.workers[workerID].onmessage = this.listener;
-
-    console.log(world);
   }
 
   addAntity(elementObject) {
@@ -91,8 +89,10 @@ class World {
       this.stage.removeChild(this.sprites[elementObject.ID]);
       console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
+      delete this.workers[elementObject.ID];
     }
     if (this.antityCount() < 1) {
+      console.log('Resurrection!');
       this.startWorker();
     }
   }
