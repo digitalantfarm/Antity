@@ -90,6 +90,9 @@ class World {
       console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
     }
+    if (antityCount < 1) {
+      this.startWorker();
+    }
   }
 
   addByproduct(elementObject) {
@@ -125,6 +128,10 @@ class World {
       this.stage.removeChild(this.sprites[elementObject.ID]);
       this.workers[elementObject.parentAntityId].postMessage(elementObject);
     }
+  }
+
+  antityCount() {
+    return Object.keys(this.workers).length;
   }
 
   listener(e) {

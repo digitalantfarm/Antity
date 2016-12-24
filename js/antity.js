@@ -27,34 +27,15 @@ class Antity {
 
   cycle() {
     if (this.isAlive) {
-      if (this.lifespan == this.maxLifespan) {
-        //this.element.removeClass('birth');
-      }
       this.lifespan--;
       this.chooseDirection();
       this.doMove();
       this.generateByproduct();
 
       if (this.lifespan <= 0) {
-        /*
-        if (antities.length == 1) {
-          this.lifespan = this.maxLifespan / 10;
-        } else {
-          */
-          this.kill();
-          /*
-        }
-        */
+        this.kill();
       }
-    } else {
-      /*
-      if (this.byproducts.length == 0) {
-        antities.splice(antities.indexOf(this), 1);
-      }
-      */
     }
-    //this.action = 'cycle';
-    //postMessage(this);
   }
 
   doMove() {
