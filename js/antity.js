@@ -34,9 +34,8 @@ class Antity {
 
       if (this.lifespan <= 0) {
         this.kill();
+        console.log(Object.keys(this.byproducts).length);
       }
-    } else {
-      console.log(Object.keys(this.byproducts).length);
     }
   }
 
