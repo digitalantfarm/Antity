@@ -78,7 +78,6 @@ class World {
 
   addAntity(elementObject) {
     this.antityCount++;
-    let aColor = 0x00aaff;
     let aTexture = TextureCache['img/antity-spritesheet.png'];
     let aRectangle = new Rectangle(0, 0, 32, 32);
     aTexture.frame = aRectangle;
@@ -99,8 +98,9 @@ class World {
 
   killAntity(elementObject) {
     if (!elementObject.isAlive) {
-    this.antityCount--;
-      this.antityStage.removeChild(this.sprites[elementObject.ID]);
+      this.antityCount--;
+      this.sprites[elementObject.ID].visible = false;
+      //this.antityStage.removeChild(this.sprites[elementObject.ID]);
       console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
     }
@@ -111,23 +111,16 @@ class World {
   }
 
   addByproduct(elementObject) {
-    let bpBlur = 1;
-    let bpColor = 0xffffff;
-    let bpScale = 0.75;
     let bpTexture = TextureCache['img/antity-spritesheet.png'];
     let bpRectangle = new Rectangle(32, 24, 16, 16);
 
     if (elementObject.fertile) {
       this.eggCount++;
-      bpBlur = 2;
-      bpColor = 0x00dd33;
-      bpScale = 1;
       bpRectangle = new Rectangle(32, 0, 24, 24);
     }
 
     bpTexture.frame = bpRectangle;
     let byproduct = new Sprite(bpTexture);
-    byproduct.scale.set(bpScale, bpScale);
     byproduct.position.set(elementObject.offset.left - (byproduct.width / 2), elementObject.offset.top - (byproduct.height / 2));
     byproduct.anchor.x = 0.5;
     byproduct.anchor.y = 0.5;
@@ -149,9 +142,11 @@ class World {
     if (!elementObject.isAlive) {
       if (elementObject.fertile) {
         this.eggCount--;
-        this.eggStage.removeChild(this.sprites[elementObject.ID]);
+        this.sprites[elementObject.ID].visible = false;
+        //this.eggStage.removeChild(this.sprites[elementObject.ID]);
       } else {
-        this.byproductStage.removeChild(this.sprites[elementObject.ID]);
+        this.sprites[elementObject.ID].visible = false;
+        //this.byproductStage.removeChild(this.sprites[elementObject.ID]);
       }
       this.workers[elementObject.parentAntityId].postMessage(elementObject);
     }
