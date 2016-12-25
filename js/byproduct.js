@@ -39,16 +39,6 @@ class Byproduct {
       } else {
         this.fade();
       }
-    } else {
-      /*
-      try {
-        let byproducts = antities[this.parentAntityId].byproducts;
-        antities[this.parentAntityId].byproducts.splice(antities[this.parentAntityId].byproducts.indexOf(this.ID), 1);
-      } catch(e) {
-        console.log('Cleaning up Byproduct ' + this.ID + ' of Antity ' + this.parentAntityId);
-        console.log(e);
-      }
-      */
     }
   }
 

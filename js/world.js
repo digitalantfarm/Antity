@@ -15,6 +15,8 @@ class World {
     this.unitOfTime = 1000 / 60;
     this.workers = {};
     this.sprites = {};
+    this.antityCount = 0;
+    this.eggCount = 0;
     this.dimensions = {
       width: $(window).width(),
       height: $(window).height()
@@ -37,8 +39,8 @@ class World {
     this.stage = new Container();
 
     this.antityStage = new ParticleContainer();
-    this.byproductStage = new ParticleContainer();
     this.eggStage = new ParticleContainer();
+    this.byproductStage = new ParticleContainer();
 
     this.stage.addChild(this.antityStage);
     this.stage.addChild(this.byproductStage);
@@ -75,6 +77,7 @@ class World {
   }
 
   addAntity(elementObject) {
+    this.antityCount++;
     let aColor = 0x00aaff;
     let aTexture = TextureCache['img/antity-spritesheet.png'];
     let aRectangle = new Rectangle(0, 0, 32, 32);
@@ -96,12 +99,12 @@ class World {
 
   killAntity(elementObject) {
     if (!elementObject.isAlive) {
+    this.antityCount--;
       this.antityStage.removeChild(this.sprites[elementObject.ID]);
       console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
-      //delete this.workers[elementObject.ID];
     }
-    if (this.antityCount() < 1) {
+    if (this.antityCount < 1 && this.eggCount < 1) {
       console.log('Resurrection!');
       this.startWorker();
     }
@@ -115,6 +118,7 @@ class World {
     let bpRectangle = new Rectangle(32, 24, 16, 16);
 
     if (elementObject.fertile) {
+      this.eggCount++;
       bpBlur = 2;
       bpColor = 0x00dd33;
       bpScale = 1;
@@ -144,6 +148,7 @@ class World {
   killByproduct(elementObject) {
     if (!elementObject.isAlive) {
       if (elementObject.fertile) {
+        this.eggCount--;
         this.eggStage.removeChild(this.sprites[elementObject.ID]);
       } else {
         this.byproductStage.removeChild(this.sprites[elementObject.ID]);
@@ -152,7 +157,7 @@ class World {
     }
   }
 
-  antityCount() {
+  getAntityCount() {
     return Object.keys(this.workers).length;
   }
 
