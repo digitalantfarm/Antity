@@ -82,6 +82,7 @@ class World {
     let aRectangle = new Rectangle(0, 0, 32, 32);
     aTexture.frame = aRectangle;
     let antity = new Sprite(aTexture);
+    antity.type = 'Antity';
     antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
     antity.anchor.x = 0.5;
     antity.anchor.y = 0.5;
@@ -99,6 +100,9 @@ class World {
   killAntity(elementObject) {
     if (!elementObject.isAlive) {
       this.antityCount--;
+      console.log(elementObject.ID);
+      console.log(this.sprites[elementObject.ID]);
+      console.log(this.sprites[elementObject.ID].visible);
       this.sprites[elementObject.ID].visible = false;
       //this.antityStage.removeChild(this.sprites[elementObject.ID]);
       console.log('Antity dead.');
@@ -121,6 +125,7 @@ class World {
 
     bpTexture.frame = bpRectangle;
     let byproduct = new Sprite(bpTexture);
+    byproduct.type = (elementObject.fertile ? 'Egg' : 'Byproduct');
     byproduct.position.set(elementObject.offset.left - (byproduct.width / 2), elementObject.offset.top - (byproduct.height / 2));
     byproduct.anchor.x = 0.5;
     byproduct.anchor.y = 0.5;
@@ -140,6 +145,9 @@ class World {
 
   killByproduct(elementObject) {
     if (!elementObject.isAlive) {
+      console.log(elementObject.ID);
+      console.log(this.sprites[elementObject.ID]);
+      console.log(this.sprites[elementObject.ID].visible);
       if (elementObject.fertile) {
         this.eggCount--;
         this.sprites[elementObject.ID].visible = false;

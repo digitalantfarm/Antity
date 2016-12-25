@@ -2,10 +2,7 @@ class Antity {
   constructor(options) {
     this.options = options;
     this.ID = options.ID;
-    console.log(this.ID);
-    if (debugAntity) {
-      console.log('Antity ' + this.ID + ' was created.');
-    }
+    console.log('Antity ' + this.ID + ' was created.');
     this.isAlive = true;
     this.maxLifespan = 1500;
     this.lifespan = this.maxLifespan;
@@ -77,18 +74,13 @@ class Antity {
   generateByproduct(probability = 0.1) {
     const chanceByproduct = Math.random();
     if (chanceByproduct <= probability) {
-      if (debugAntity) {
-        console.log('Antity ' + this.ID + ' created Byproduct ' + this.byproducts.length + '.');
-      }
       let byproductId = uuid.v4();
       this.byproducts[byproductId] = new Byproduct(byproductId, this.ID, this.offset);
     }
   }
 
   kill() {
-    if (debugAntity) {
-      console.log('Antity ' + this.ID + ' is now finished.');
-    }
+    console.log('Antity ' + this.ID + ' is now finished.');
     this.isAlive = false;
     this.action = 'killAntity';
     postMessage(this);

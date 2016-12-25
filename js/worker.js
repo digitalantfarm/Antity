@@ -29,5 +29,4 @@ onmessage = function (e) {
 function createAntity(data) {
   console.log('Instantiating Antity...');
   antity = new Antity(data);
-  console.log(antity);
 }

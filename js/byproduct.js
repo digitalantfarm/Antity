@@ -2,9 +2,6 @@ class Byproduct {
   constructor(byproductId, parentAntityId, spawnLocation = undefined) {
     this.ID = byproductId;
     this.parentAntityId = parentAntityId;
-    if (debugAntity) {
-      console.log('Byproduct ' + this.ID + ' was created by Antity ' + parentAntityId + '.');
-    }
     this.isAlive = true;
     this.offset = spawnLocation;
     this.opacity = 1;
@@ -65,9 +62,7 @@ class Byproduct {
   }
 
   hatch() {
-    if (debugAntity) {
-      console.log('Byproduct ' + this.ID + ' hatched into Antity ' + antities.length + '.');
-    }
+    console.log('Byproduct ' + this.ID + ' hatched into Antity ' + antities.length + '.');
 
     this.action = 'hatchByproduct';
     postMessage(this);
@@ -76,9 +71,6 @@ class Byproduct {
   }
 
   kill() {
-    if (debugAntity) {
-      console.log('Byproduct ' + this.ID + ' is now finished.');
-    }
     this.isAlive = false;
     this.action = 'killByproduct';
     postMessage(this);
