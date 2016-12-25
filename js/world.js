@@ -34,7 +34,15 @@ class World {
     this.renderer.backgroundColor = 0x111111;
     document.body.appendChild(this.renderer.view);
 
-    this.stage = new ParticleContainer();
+    this.stage = new Container();
+
+    this.antityStage = new ParticleContainer();
+    this.byproductStage = new ParticleContainer();
+    this.eggStage = new ParticleContainer();
+
+    this.stage.addChild(this.antityStage);
+    this.stage.addChild(this.byproductStage);
+    this.stage.addChild(this.eggStage);
 
     this.animate();
     this.startWorker();
@@ -73,10 +81,12 @@ class World {
     aTexture.frame = aRectangle;
     let antity = new Sprite(aTexture);
     antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
+    antity.anchor.x = 0.5;
+    antity.anchor.y = 0.5;
 
     this.sprites[elementObject.ID] = antity;
 
-    this.stage.addChild(this.sprites[elementObject.ID]);
+    this.antityStage.addChild(this.sprites[elementObject.ID]);
   }
 
   moveAntity(elementObject) {
@@ -86,7 +96,7 @@ class World {
 
   killAntity(elementObject) {
     if (!elementObject.isAlive) {
-      this.stage.removeChild(this.sprites[elementObject.ID]);
+      this.antityStage.removeChild(this.sprites[elementObject.ID]);
       console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
       //delete this.workers[elementObject.ID];
@@ -115,10 +125,16 @@ class World {
     let byproduct = new Sprite(bpTexture);
     byproduct.scale.set(bpScale, bpScale);
     byproduct.position.set(elementObject.offset.left - (byproduct.width / 2), elementObject.offset.top - (byproduct.height / 2));
+    byproduct.anchor.x = 0.5;
+    byproduct.anchor.y = 0.5;
 
     this.sprites[elementObject.ID] = byproduct;
 
-    this.stage.addChild(this.sprites[elementObject.ID]);
+    if (elementObject.fertile) {
+      this.eggStage.addChild(this.sprites[elementObject.ID]);
+    } else {
+      this.byproductStage.addChild(this.sprites[elementObject.ID]);
+    }
   }
 
   fadeByproduct(elementObject) {
@@ -127,7 +143,11 @@ class World {
 
   killByproduct(elementObject) {
     if (!elementObject.isAlive) {
-      this.stage.removeChild(this.sprites[elementObject.ID]);
+      if (elementObject.fertile) {
+        this.eggStage.removeChild(this.sprites[elementObject.ID]);
+      } else {
+        this.byproductStage.removeChild(this.sprites[elementObject.ID]);
+      }
       this.workers[elementObject.parentAntityId].postMessage(elementObject);
     }
   }
