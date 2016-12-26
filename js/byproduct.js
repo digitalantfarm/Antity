@@ -62,7 +62,7 @@ class Byproduct {
   }
 
   hatch() {
-    console.log('Byproduct ' + this.ID + ' hatched into Antity ' + antities.length + '.');
+    console.log('Byproduct ' + this.ID + ' hatched into Antity ' + this.parentAntityId + '.');
 
     this.action = 'hatchByproduct';
     postMessage(this);
