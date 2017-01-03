@@ -18,9 +18,11 @@ onmessage = function (e) {
         postMessage(e.data);
         break;
       case 'killAntity':
+        antity.isAlive = -1;
         this.close();
       case 'killByproduct':
-        delete antity.byproducts[e.data.ID];
+        antity.byproducts[e.data.ID].isAlive = -1;
+        antity.byproducts[e.data.ID].close();
         break;
     }
   }

@@ -5,6 +5,7 @@ let Container = PIXI.Container
   , resources = PIXI.loader.resources
   , Sprite = PIXI.Sprite
   , Graphics = PIXI.Graphics
+  , Texture = PIXI.Texture
   , TextureCache = PIXI.utils.TextureCache
   , Rectangle = PIXI.Rectangle
   , BlurFilter = PIXI.filters.BlurFilter;
@@ -78,12 +79,15 @@ class World {
 
   addAntity(elementObject) {
     this.antityCount++;
-    let aTexture = TextureCache['img/antity-spritesheet.png'];
-    let aRectangle = new Rectangle(0, 0, 32, 32);
-    aTexture.frame = aRectangle;
-    let antity = new Sprite(aTexture);
+    //let aTexture = TextureCache['img/antity-spritesheet.png'];
+    //let aRectangle = new Rectangle(0, 0, 32, 32);
+    //aTexture.frame = aRectangle;
+    //let antity = new Sprite(aTexture);
+    let antity = new Sprite(this.frame('img/antity-spritesheet.png', 0, 0, 32, 32));
     antity.type = 'Antity';
-    antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
+    antity.ID = elementObject.ID;
+    //antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
+    antity.position.set(elementObject.offset.left, elementObject.offset.top);
     antity.anchor.x = 0.5;
     antity.anchor.y = 0.5;
 
@@ -94,17 +98,18 @@ class World {
 
   moveAntity(elementObject) {
     let antity = this.sprites[elementObject.ID];
-    antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
+    //antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
+    antity.position.set(elementObject.offset.left, elementObject.offset.top);
   }
 
   killAntity(elementObject) {
-    if (!elementObject.isAlive) {
+    if (elementObject.isAlive == 0) {
       this.antityCount--;
       console.log(elementObject.ID);
-      console.log(this.sprites[elementObject.ID]);
-      console.log(this.sprites[elementObject.ID].visible);
+      //console.log(this.sprites[elementObject.ID]);
+      //console.log(this.sprites[elementObject.ID].visible);
       this.sprites[elementObject.ID].visible = false;
-      //this.antityStage.removeChild(this.sprites[elementObject.ID]);
+      console.log(this.antityStage.removeChild(this.sprites[elementObject.ID]));
       console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
     }
@@ -115,18 +120,27 @@ class World {
   }
 
   addByproduct(elementObject) {
-    let bpTexture = TextureCache['img/antity-spritesheet.png'];
-    let bpRectangle = new Rectangle(32, 24, 16, 16);
+    //let bpTexture = TextureCache['img/antity-spritesheet.png'];
+    //let bpRectangle = new Rectangle(32, 24, 16, 16);
 
     if (elementObject.fertile) {
       this.eggCount++;
-      bpRectangle = new Rectangle(32, 0, 24, 24);
+      //bpRectangle = new Rectangle(32, 0, 24, 24);
     }
 
-    bpTexture.frame = bpRectangle;
-    let byproduct = new Sprite(bpTexture);
+    let byproduct = null;
+
+    //bpTexture.frame = bpRectangle;
+    //let byproduct = new Sprite(bpTexture);
+    if (elementObject.fertile) {
+      byproduct = new Sprite(this.frame('img/antity-spritesheet.png', 32, 0, 24, 24));
+    } else {
+      byproduct = new Sprite(this.frame('img/antity-spritesheet.png', 32, 24, 16, 16));
+    }
     byproduct.type = (elementObject.fertile ? 'Egg' : 'Byproduct');
-    byproduct.position.set(elementObject.offset.left - (byproduct.width / 2), elementObject.offset.top - (byproduct.height / 2));
+    byproduct.ID = elementObject.ID;
+    //byproduct.position.set(elementObject.offset.left - (byproduct.width / 2), elementObject.offset.top - (byproduct.height / 2));
+    byproduct.position.set(elementObject.offset.left, elementObject.offset.top);
     byproduct.anchor.x = 0.5;
     byproduct.anchor.y = 0.5;
 
@@ -146,17 +160,39 @@ class World {
   killByproduct(elementObject) {
     if (!elementObject.isAlive) {
       console.log(elementObject.ID);
-      console.log(this.sprites[elementObject.ID]);
-      console.log(this.sprites[elementObject.ID].visible);
+      //console.log(this.sprites[elementObject.ID]);
+      //console.log(this.sprites[elementObject.ID].visible);
       if (elementObject.fertile) {
         this.eggCount--;
         this.sprites[elementObject.ID].visible = false;
-        //this.eggStage.removeChild(this.sprites[elementObject.ID]);
+        console.log(this.eggStage.removeChild(this.sprites[elementObject.ID]));
+        //console.log(this.sprites[elementObject.ID].destroy(true, true));
       } else {
         this.sprites[elementObject.ID].visible = false;
-        //this.byproductStage.removeChild(this.sprites[elementObject.ID]);
+        console.log(this.byproductStage.removeChild(this.sprites[elementObject.ID]));
+        //console.log(this.sprites[elementObject.ID].destroy(true, true));
       }
       this.workers[elementObject.parentAntityId].postMessage(elementObject);
+    }
+  }
+
+  frame(src, x, y, w, h) {
+    let texture, imageFrame;
+
+    if (typeof src === 'string') {
+      if (TextureCache[src]) {
+        texture = new Texture(TextureCache[src]);
+      }
+    } else if (src instanceof Texture) {
+      texture = new Texture(src);
+    }
+
+    if (!texture) {
+      console.log(`Please load the ${src} texture into the cache.`);
+    } else {
+      imageFrame = new Rectangle(x, y, w, h);
+      texture.frame = imageFrame;
+      return texture;
     }
   }
 

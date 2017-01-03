@@ -3,7 +3,7 @@ class Antity {
     this.options = options;
     this.ID = options.ID;
     console.log('Antity ' + this.ID + ' was created.');
-    this.isAlive = true;
+    this.isAlive = 1;
     this.maxLifespan = 1500;
     this.lifespan = this.maxLifespan;
     this.offset = options.offset || {
@@ -23,7 +23,7 @@ class Antity {
   }
 
   cycle() {
-    if (this.isAlive) {
+    if (this.isAlive > 0) {
       this.lifespan--;
       this.chooseDirection();
       this.doMove();
@@ -81,7 +81,7 @@ class Antity {
 
   kill() {
     console.log('Antity ' + this.ID + ' is now finished.');
-    this.isAlive = false;
+    this.isAlive = 0;
     this.action = 'killAntity';
     postMessage(this);
   }

@@ -2,7 +2,7 @@ class Byproduct {
   constructor(byproductId, parentAntityId, spawnLocation = undefined) {
     this.ID = byproductId;
     this.parentAntityId = parentAntityId;
-    this.isAlive = true;
+    this.isAlive = 1;
     this.offset = spawnLocation;
     this.opacity = 1;
     this.fadeStep = 0.005;
@@ -26,7 +26,7 @@ class Byproduct {
   }
 
   cycle() {
-    if (this.isAlive) {
+    if (this.isAlive > 0) {
       if (this.fertile) {
         if (this.incubationPeriod <= 0) {
           this.hatch();
@@ -71,7 +71,7 @@ class Byproduct {
   }
 
   kill() {
-    this.isAlive = false;
+    this.isAlive = 0;
     this.action = 'killByproduct';
     postMessage(this);
   }
