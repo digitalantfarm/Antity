@@ -19,16 +19,22 @@ onmessage = function (e) {
         break;
       case 'killAntity':
         antity.isAlive = -1;
-        this.close();
+        break;
       case 'killByproduct':
         antity.byproducts[e.data.ID].isAlive = -1;
-        antity.byproducts[e.data.ID].close();
+        if (getByproductCount(antity) < 1 && antity.isAlive < 0) {
+          this.close();
+        }
         break;
     }
   }
 };
 
 function createAntity(data) {
-  console.log('Instantiating Antity...');
+  //console.log('Instantiating Antity...');
   antity = new Antity(data);
+}
+
+function getByproductCount(a) {
+  return Object.keys(a.byproducts).length;
 }

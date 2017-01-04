@@ -2,7 +2,7 @@ class Antity {
   constructor(options) {
     this.options = options;
     this.ID = options.ID;
-    console.log('Antity ' + this.ID + ' was created.');
+    //console.log('Antity ' + this.ID + ' was created.');
     this.isAlive = 1;
     this.maxLifespan = 1500;
     this.lifespan = this.maxLifespan;
@@ -31,7 +31,7 @@ class Antity {
 
       if (this.lifespan <= 0) {
         this.kill();
-        console.log(Object.keys(this.byproducts).length);
+        //console.log(Object.keys(this.byproducts).length);
       }
     }
   }
@@ -80,7 +80,7 @@ class Antity {
   }
 
   kill() {
-    console.log('Antity ' + this.ID + ' is now finished.');
+    //console.log('Antity ' + this.ID + ' is now finished.');
     this.isAlive = 0;
     this.action = 'killAntity';
     postMessage(this);

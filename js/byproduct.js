@@ -18,7 +18,7 @@ class Byproduct {
     }, unitOfTime * 5, this);
 
     if (this.fertile) {
-      console.log('Laid an egg!');
+      //console.log('Laid an egg!');
     }
 
     this.action = 'createByproduct';
@@ -62,7 +62,7 @@ class Byproduct {
   }
 
   hatch() {
-    console.log('Byproduct ' + this.ID + ' hatched into Antity ' + this.parentAntityId + '.');
+    //console.log('Byproduct ' + this.ID + ' hatched into Antity ' + this.parentAntityId + '.');
 
     this.action = 'hatchByproduct';
     postMessage(this);

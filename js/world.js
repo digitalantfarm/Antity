@@ -1,3 +1,6 @@
+var d = new Date();
+var n = d.getTime();
+
 let Container = PIXI.Container
   , ParticleContainer = PIXI.ParticleContainer
   , autoDetectRenderer = PIXI.autoDetectRenderer
@@ -105,16 +108,16 @@ class World {
   killAntity(elementObject) {
     if (elementObject.isAlive == 0) {
       this.antityCount--;
-      console.log(elementObject.ID);
+      //console.log(elementObject.ID);
       //console.log(this.sprites[elementObject.ID]);
       //console.log(this.sprites[elementObject.ID].visible);
       this.sprites[elementObject.ID].visible = false;
-      console.log(this.antityStage.removeChild(this.sprites[elementObject.ID]));
-      console.log('Antity dead.');
+      this.antityStage.removeChild(this.sprites[elementObject.ID]);
+      //console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
     }
     if (this.antityCount < 1 && this.eggCount < 1) {
-      console.log('Resurrection!');
+      //console.log('Resurrection!');
       this.startWorker();
     }
   }
@@ -159,17 +162,17 @@ class World {
 
   killByproduct(elementObject) {
     if (!elementObject.isAlive) {
-      console.log(elementObject.ID);
+      //console.log(elementObject.ID);
       //console.log(this.sprites[elementObject.ID]);
       //console.log(this.sprites[elementObject.ID].visible);
       if (elementObject.fertile) {
         this.eggCount--;
         this.sprites[elementObject.ID].visible = false;
-        console.log(this.eggStage.removeChild(this.sprites[elementObject.ID]));
+        this.eggStage.removeChild(this.sprites[elementObject.ID]);
         //console.log(this.sprites[elementObject.ID].destroy(true, true));
       } else {
         this.sprites[elementObject.ID].visible = false;
-        console.log(this.byproductStage.removeChild(this.sprites[elementObject.ID]));
+        this.byproductStage.removeChild(this.sprites[elementObject.ID]);
         //console.log(this.sprites[elementObject.ID].destroy(true, true));
       }
       this.workers[elementObject.parentAntityId].postMessage(elementObject);
@@ -218,7 +221,7 @@ class World {
         world.fadeByproduct(e.data);
         break;
       case 'hatchByproduct':
-        console.log('Hatching!');
+        //console.log('Hatching!');
         world.startWorker(e.data.offset);
         break;
       case 'killByproduct':
@@ -228,7 +231,7 @@ class World {
   }
 }
 
-var world = new World('js/worker.js');
+var world = new World('js/worker.js?' + n);
 
 function click2create() {
   $(document).click(function(e) {
