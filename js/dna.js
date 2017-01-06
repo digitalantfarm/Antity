@@ -38,6 +38,7 @@ let worldStage = new Container();
 loader
   .add('antity-type1-genome', 'js/antity-type1-genome.json?' + n)
   .add('antity-type2-genome', 'js/antity-type2-genome.json?' + n)
+  .add('plantity-type1-genome', 'js/plantity-type1-genome.json?' + n)
   .add('img/antity-spritesheet.png')
   .load(setup);
 
@@ -48,11 +49,25 @@ function setup() {
   };
 
   for (let i = 0; i < 1000; i++) {
+    let selectOrganism = Math.random();
+    switch(true) {
+      case (selectOrganism < 0.3):
+        world.antities.push(new Antity('antity-type1-genome'));
+        break;
+      case (selectOrganism < 0.6):
+        world.antities.push(new Antity('antity-type2-genome'));
+        break;
+      default:
+        world.antities.push(new Plantity('plantity-type1-genome'));
+        break;
+    }
+    /*
     if ( Math.random() > 0.5 ) {
       world.antities.push(new Antity('antity-type1-genome'));
     } else {
       world.antities.push(new Antity('antity-type2-genome'));
     }
+    */
   }
 
   world.antities.forEach(function(element) {
@@ -66,7 +81,9 @@ function animate() {
   requestAnimationFrame(animate);
 
   world.antities.forEach(function(element) {
-    element.move(world.target);
+    if (element instanceof Antity) {
+      element.move(world.target);
+    }
   }, this);
 
   renderer.render(worldStage);
@@ -170,6 +187,60 @@ class Antity {
         this.isMoving = false;
       }
     }
+  }
+}
+
+class Plantity {
+  constructor(genome) {
+    this.dna = resources[genome].data;
+    this.genotype = {};
+
+    this.sprite = new Sprite(frame('img/antity-spritesheet.png', 32, 24, 16, 16));
+    this.sprite.anchor.set(0.5, 0.5);
+
+    let randomX = Math.floor((Math.random() * world.dimensions.width) + 1);
+    let randomY = Math.floor((Math.random() * world.dimensions.height) + 1);
+    this.sprite.position.set(randomX, randomY);
+
+    this.createGenotype();
+
+    this.sprite.scale.set(this.size / 50, this.size / 50);
+
+    this.sprite.tint = this.genotype.colour;
+
+    this.food = this.size * this.energy;
+  }
+
+  createGenotype() {
+    let deviations = {};
+    this.dna.chromosomes.forEach(function(chromosome) {
+      chromosome.genes.forEach(function(gene) {
+        let properties = Object.keys(gene);
+        properties.forEach(function(p) {
+          if (p.indexOf('Deviation') >= 0) {
+            deviations[p] = gene[p];
+          }
+        }, this);
+      }, this);
+    }, this);
+    this.dna.chromosomes.forEach(function(chromosome) {
+      chromosome.genes.forEach(function(gene) {
+        let properties = Object.keys(gene);
+        properties.forEach(function(p) {
+          if (p != 'isDominant' && p.indexOf('Deviation') < 0) {
+            let newAttributeValue = gene[p];
+            if (Object.keys(deviations).indexOf(p + 'Deviation') >= 0) {
+              let deviation = deviations[p + 'Deviation'];
+              let lowerLimit = gene[p] - deviation;
+              let upperLimit = gene[p] + deviation;
+              newAttributeValue = Math.floor((Math.random() * upperLimit) + lowerLimit);
+            }
+            this[p] = newAttributeValue;
+            this.genotype[p] = newAttributeValue;
+          }
+        }, this);
+      }, this);
+    }, this);
   }
 }
 
