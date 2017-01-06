@@ -36,7 +36,8 @@ document.body.appendChild(renderer.view);
 let worldStage = new Container();
 
 loader
-  .add('antity-genome', 'js/antity-genome.json?' + n)
+  .add('antity-type1-genome', 'js/antity-type1-genome.json?' + n)
+  .add('antity-type2-genome', 'js/antity-type2-genome.json?' + n)
   .add('img/antity-spritesheet.png')
   .load(setup);
 
@@ -46,8 +47,12 @@ function setup() {
     y: world.dimensions.height / 2
   };
 
-  for (let i = 0; i < 100; i++) {
-    world.antities.push(new Antity('antity-genome'));
+  for (let i = 0; i < 1000; i++) {
+    if ( Math.random() > 0.5 ) {
+      world.antities.push(new Antity('antity-type1-genome'));
+    } else {
+      world.antities.push(new Antity('antity-type2-genome'));
+    }
   }
 
   world.antities.forEach(function(element) {
@@ -95,7 +100,7 @@ class Antity {
 
     this.sprite.scale.set(this.size / 50, this.size / 50);
 
-    this.sprite.tint = stringToColour(JSON.stringify(this.genotype));
+    this.sprite.tint = stringToColour(this.genotype.diet + this.genotype.personality);
 
     this.target = {
       x: world.target.x,
