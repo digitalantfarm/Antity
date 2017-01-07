@@ -11,7 +11,8 @@ let Container = PIXI.Container
   , TextureCache = PIXI.utils.TextureCache
   , Rectangle = PIXI.Rectangle
   , BlurFilter = PIXI.filters.BlurFilter
-  , Texture = PIXI.Texture;
+  , Texture = PIXI.Texture
+  , bump = new Bump(PIXI);
 
 let world = {};
 
@@ -23,6 +24,7 @@ world.dimensions = {
 world.elapsed = 0.1;
 
 world.antities = new Array();
+world.plantities = new Array();
 
 let renderer = new autoDetectRenderer(world.dimensions.width, world.dimensions.height, {
   antialias: true,
@@ -39,7 +41,7 @@ loader
   .add('antity-type1-genome', 'js/antity-type1-genome.json?' + n)
   .add('antity-type2-genome', 'js/antity-type2-genome.json?' + n)
   .add('plantity-type1-genome', 'js/plantity-type1-genome.json?' + n)
-  .add('img/antity-spritesheet.png')
+  .add('img/antity-sprite-simple.png')
   .load(setup);
 
 function setup() {
@@ -48,17 +50,30 @@ function setup() {
     y: world.dimensions.height / 2
   };
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 100; i++) {
     let selectOrganism = Math.random();
     switch(true) {
-      case (selectOrganism < 0.3):
+      case (selectOrganism < 1):
+        world.plantities.push(new Plantity('plantity-type1-genome'));
+        break;
+    }
+    /*
+    if ( Math.random() > 0.5 ) {
+      world.antities.push(new Antity('antity-type1-genome'));
+    } else {
+      world.antities.push(new Antity('antity-type2-genome'));
+    }
+    */
+  }
+
+  for (let i = 0; i < 100; i++) {
+    let selectOrganism = Math.random();
+    switch(true) {
+      case (selectOrganism < 0.5):
         world.antities.push(new Antity('antity-type1-genome'));
         break;
-      case (selectOrganism < 0.6):
+      case (selectOrganism < 1):
         world.antities.push(new Antity('antity-type2-genome'));
-        break;
-      default:
-        world.antities.push(new Plantity('plantity-type1-genome'));
         break;
     }
     /*
@@ -74,6 +89,10 @@ function setup() {
     worldStage.addChild(element.sprite);
   }, this);
 
+  world.plantities.forEach(function(element) {
+    worldStage.addChild(element.sprite);
+  }, this);
+
   animate();
 }
 
@@ -81,9 +100,11 @@ function animate() {
   requestAnimationFrame(animate);
 
   world.antities.forEach(function(element) {
-    if (element instanceof Antity) {
-      element.move(world.target);
-    }
+    element.update();
+  }, this);
+
+  world.plantities.forEach(function(element) {
+    element.update();
   }, this);
 
   renderer.render(worldStage);
@@ -105,7 +126,7 @@ class Antity {
     this.dna = resources[genome].data;
     this.genotype = {};
 
-    this.sprite = new Sprite(frame('img/antity-spritesheet.png', 32, 24, 16, 16));
+    this.sprite = new Sprite(frame('img/antity-sprite-simple.png', 0, 0, 32, 32));
     this.sprite.anchor.set(0.5, 0.5);
 
     let randomX = Math.floor((Math.random() * world.dimensions.width) + 1);
@@ -115,14 +136,127 @@ class Antity {
 
     this.createGenotype();
 
+    this.circular = true;
+
     this.sprite.scale.set(this.size / 50, this.size / 50);
 
     this.sprite.tint = stringToColour(this.genotype.diet + this.genotype.personality);
 
+    /*
     this.target = {
       x: world.target.x,
       y: world.target.y
     };
+    */
+    this.target = {
+      x: null,
+      y: null
+    };
+
+    /*
+    this.setTarget = {
+      x: this.target.x,
+      y: this.target.y
+    };
+    */
+
+    this.meal = null;
+
+    this.status = 'hungry';
+  }
+
+  update() {
+
+    switch(this.status) {
+      case 'hungry':
+        let foodTarget = this.findFoodTarget();
+        //console.log(foodTarget);
+        this.target = foodTarget;
+        this.isMoving = true;
+        this.status = 'hunting';
+        break;
+      case 'eating':
+        //console.log(this.meal);
+        if (this.meal.energy > 0) {
+          this.meal.energy--;
+        } else {
+          //this.meal.sprite.destroy();
+          this.meal.sprite.visible = false;
+          this.status = 'hungry';
+          this.meal = null;
+        }
+        break;
+      case 'hunting':
+        //this.move();
+        break;
+      default:
+        break;
+    }
+
+    if (this.isMoving) {
+      this.move();
+      world.plantities.forEach(function(plantity) {
+        if (this.sprite == null) {
+          // Oh
+        } else {
+          if (bump.hit(this.sprite, plantity.sprite)) {
+            this.status = 'eating';
+            this.meal = plantity;
+            this.isMoving = false;
+          }
+        }
+      }, this);
+    }
+
+  }
+
+  findFoodTarget() {
+    let nearbyFood = {
+      x: 0,
+      y: 0,
+      xDiff: 0,
+      yDiff: 0,
+      targetFood: null
+    };
+
+    world.plantities.forEach(function(plantity, index) {
+    let xDiff = (plantity.sprite.x - this.sprite.x) * -1;
+    let yDiff = (plantity.sprite.y - this.sprite.y) * -1;
+      let candidate = ( ( xDiff * -1) < (yDiff * -1) ? 'x' : 'y' );
+
+      if (xDiff < nearbyFood.xDiff) {
+        nearbyFood.x = plantity.sprite.x;
+        nearbyFood.xDiff = xDiff;
+        nearbyFood.targetFood = (candidate == 'x' ? index : nearbyFood.targetFood);
+        if (candidate == 'x') {
+          nearbyFood.y = plantity.sprite.y;
+        }
+      }
+      if (plantity.sprite.y - this.sprite.y < nearbyFood.yDiff) {
+        nearbyFood.y = plantity.sprite.y;
+        nearbyFood.yDiff = yDiff;
+        nearbyFood.targetFood = (candidate == 'y' ? index : nearbyFood.targetFood);
+        if (candidate == 'y') {
+          nearbyFood.x = plantity.sprite.x;
+        }
+      }
+      /*
+      let senseRadius = this.sprite.width * 2;
+      if (plantity.sprite.x > (this.sprite.x + senseRadius) && plantity.sprite.x < (this.sprite.x + senseRadius)) {
+        if (plantity.sprite.y > (this.sprite.y - senseRadius) && plantity.sprite.y < (this.sprite.y + senseRadius)) {
+          if (nearbyFood.food == undefined || nearbyFood.food < plantity.food) {
+            nearbyFood = {
+              x: plantity.sprite.x,
+              y: plantity.sprite.y,
+              food: plantity.food
+            };
+          }
+        }
+      }
+      */
+    }, this);
+
+    return nearbyFood;
   }
 
   createGenotype() {
@@ -157,7 +291,8 @@ class Antity {
     }, this);
   }
 
-  move(target) {
+  move() {
+    /*
     if (target.x !== this.target.x && target.y !== this.target.y) {
       this.target = {
         x: target.x,
@@ -165,11 +300,12 @@ class Antity {
       };
       this.isMoving = true;
     }
+    */
 
     let startX = this.sprite.x;
     let startY = this.sprite.y;
-    let endX = target.x;
-    let endY = target.y;
+    let endX = this.target.x;
+    let endY = this.target.y;
     let speed = this.speed;
     let elapsed = world.elapsed;
 
@@ -195,7 +331,7 @@ class Plantity {
     this.dna = resources[genome].data;
     this.genotype = {};
 
-    this.sprite = new Sprite(frame('img/antity-spritesheet.png', 32, 24, 16, 16));
+    this.sprite = new Sprite(frame('img/antity-sprite-simple.png', 0, 0, 32, 32));
     this.sprite.anchor.set(0.5, 0.5);
 
     let randomX = Math.floor((Math.random() * world.dimensions.width) + 1);
@@ -204,11 +340,18 @@ class Plantity {
 
     this.createGenotype();
 
-    this.sprite.scale.set(this.size / 50, this.size / 50);
+    this.circular = true;
+
+    this.size = this.energy / 10;
+
+    this.sprite.scale.set(this.size / 100, this.size / 100);
 
     this.sprite.tint = this.genotype.colour;
+  }
 
-    this.food = this.size * this.energy;
+  update() {
+    this.size = this.energy / 10;
+    this.sprite.scale.set(this.size / 100, this.size / 100);
   }
 
   createGenotype() {

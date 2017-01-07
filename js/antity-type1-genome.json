@@ -3,11 +3,11 @@
         {
             "genes": [
                 {
-                    "speed": 15,
+                    "speed": 10,
                     "isDominant": true
                 },
                 {
-                    "speedDeviation": 5,
+                    "speedDeviation": 3,
                     "isDominant": false
                 },
                 {
