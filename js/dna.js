@@ -57,13 +57,6 @@ function setup() {
         world.plantities.push(new Plantity('plantity-type1-genome'));
         break;
     }
-    /*
-    if ( Math.random() > 0.5 ) {
-      world.antities.push(new Antity('antity-type1-genome'));
-    } else {
-      world.antities.push(new Antity('antity-type2-genome'));
-    }
-    */
   }
 
   for (let i = 0; i < 100; i++) {
@@ -76,13 +69,6 @@ function setup() {
         world.antities.push(new Antity('antity-type2-genome'));
         break;
     }
-    /*
-    if ( Math.random() > 0.5 ) {
-      world.antities.push(new Antity('antity-type1-genome'));
-    } else {
-      world.antities.push(new Antity('antity-type2-genome'));
-    }
-    */
   }
 
   world.antities.forEach(function(element) {
@@ -142,23 +128,10 @@ class Antity {
 
     this.sprite.tint = stringToColour(this.genotype.diet + this.genotype.personality);
 
-    /*
-    this.target = {
-      x: world.target.x,
-      y: world.target.y
-    };
-    */
     this.target = {
       x: null,
       y: null
     };
-
-    /*
-    this.setTarget = {
-      x: this.target.x,
-      y: this.target.y
-    };
-    */
 
     this.meal = null;
 
@@ -170,24 +143,20 @@ class Antity {
     switch(this.status) {
       case 'hungry':
         let foodTarget = this.findFoodTarget();
-        //console.log(foodTarget);
         this.target = foodTarget;
         this.isMoving = true;
         this.status = 'hunting';
         break;
       case 'eating':
-        //console.log(this.meal);
         if (this.meal.energy > 0) {
           this.meal.energy--;
         } else {
-          //this.meal.sprite.destroy();
           this.meal.sprite.visible = false;
           this.status = 'hungry';
           this.meal = null;
         }
         break;
       case 'hunting':
-        //this.move();
         break;
       default:
         break;
@@ -240,20 +209,6 @@ class Antity {
           nearbyFood.x = plantity.sprite.x;
         }
       }
-      /*
-      let senseRadius = this.sprite.width * 2;
-      if (plantity.sprite.x > (this.sprite.x + senseRadius) && plantity.sprite.x < (this.sprite.x + senseRadius)) {
-        if (plantity.sprite.y > (this.sprite.y - senseRadius) && plantity.sprite.y < (this.sprite.y + senseRadius)) {
-          if (nearbyFood.food == undefined || nearbyFood.food < plantity.food) {
-            nearbyFood = {
-              x: plantity.sprite.x,
-              y: plantity.sprite.y,
-              food: plantity.food
-            };
-          }
-        }
-      }
-      */
     }, this);
 
     return nearbyFood;
@@ -292,16 +247,6 @@ class Antity {
   }
 
   move() {
-    /*
-    if (target.x !== this.target.x && target.y !== this.target.y) {
-      this.target = {
-        x: target.x,
-        y: target.y
-      };
-      this.isMoving = true;
-    }
-    */
-
     let startX = this.sprite.x;
     let startY = this.sprite.y;
     let endX = this.target.x;
