@@ -23,8 +23,8 @@ world.dimensions = {
 
 world.elapsed = 0.1;
 
-world.antities = new Array();
-world.plantities = new Array();
+world.antities = {};
+world.plantities = {};
 
 let renderer = new autoDetectRenderer(world.dimensions.width, world.dimensions.height, {
   antialias: true,
@@ -58,31 +58,33 @@ function setup() {
 
   for (let i = 0; i < 100; i++) {
     let selectOrganism = Math.random();
+    let newPlantityID = uuid.v4();
     switch(true) {
       case (selectOrganism < 1):
-        world.plantities.push(new Plantity('plantity-type1-genome'));
+        world.plantities[newPlantityID] = new Plantity('plantity-type1-genome');
         break;
     }
   }
 
   for (let i = 0; i < 100; i++) {
     let selectOrganism = Math.random();
+    let newAntityID = uuid.v4();
     switch(true) {
       case (selectOrganism < 0.5):
-        world.antities.push(new Antity('antity-type1-genome'));
+        world.antities[newAntityID] = new Antity('antity-type1-genome');
         break;
       case (selectOrganism < 1):
-        world.antities.push(new Antity('antity-type2-genome'));
+        world.antities[newAntityID] = new Antity('antity-type2-genome');
         break;
     }
   }
 
-  world.plantities.forEach(function(element) {
-    plantityBiome.addChild(element.sprite);
+  Object.keys(world.plantities).forEach(function(element) {
+    plantityBiome.addChild(world.plantities[element].sprite);
   }, this);
 
-  world.antities.forEach(function(element) {
-    antityBiome.addChild(element.sprite);
+  Object.keys(world.antities).forEach(function(element) {
+    antityBiome.addChild(world.antities[element].sprite);
   }, this);
 
   animate();
@@ -91,12 +93,12 @@ function setup() {
 function animate() {
   requestAnimationFrame(animate);
 
-  world.antities.forEach(function(element) {
-    element.update();
+  Object.keys(world.antities).forEach(function(element) {
+    world.antities[element].update();
   }, this);
 
-  world.plantities.forEach(function(element) {
-    element.update();
+  Object.keys(world.plantities).forEach(function(element) {
+    world.plantities[element].update();
   }, this);
 
   renderer.render(worldStage);
@@ -129,26 +131,23 @@ class Antity {
 
     this.sprite.tint = stringToColour(this.genotype.diet + this.genotype.personality);
 
-    this.target = {
-      x: null,
-      y: null
-    };
+    this.targetID = null;
 
-    this.meal = null;
+    this.mealID = null;
 
     this.status = 'hungry';
   }
 
   update() {
 
-    world.plantities.forEach(function(plantity) {
-      if (bump.hit(this.sprite, plantity.sprite)) {
-        if (plantity.isAlive) {
+    Object.keys(world.plantities).forEach(function(plantity) {
+      if (bump.hit(this.sprite, world.plantities[plantity].sprite)) {
+        if (world.plantities[plantity].isAlive) {
           this.status = 'eating';
-          this.meal = plantity;
+          this.mealID = plantity;
         } else {
           this.status = 'hungry';
-          this.meal = null;
+          this.mealID = null;
         }
       }
     }, this);
@@ -156,11 +155,11 @@ class Antity {
     switch(this.status) {
       case 'eating':
         this.isMoving = false;
-        if (this.meal.energy > 0) {
-          this.meal.energy -= 10;
+        if (world.plantities[this.mealID].energy > 0) {
+          world.plantities[this.mealID].energy -= 10;
         } else {
           this.status = 'hungry';
-          this.meal = null;
+          this.mealID = null;
         }
         break;
       case 'hunting':
@@ -168,7 +167,7 @@ class Antity {
         break;
       case 'hungry':
         let foodTarget = this.findFoodTarget();
-        this.target = foodTarget;
+        this.targetID = foodTarget;
         this.status = 'hunting';
         this.isMoving = true;
         break;
@@ -178,7 +177,7 @@ class Antity {
     }
 
     if (this.isMoving) {
-      if (this.target == undefined || this.target == null) {
+      if (this.targetID == undefined || this.targetID == null) {
         this.status = 'hungry';
       }
       this.move();
@@ -187,18 +186,22 @@ class Antity {
   }
 
   findFoodTarget() {
-    let foundFood = {};
+    let foundFood = {
+      ID: null,
+      distance: null
+    };
 
-    world.plantities.forEach(function(plantity) {
-      if (!foundFood.x) {
-        foundFood = plantity.sprite;
+    Object.keys(world.plantities).forEach(function(plantity) {
+      if (!foundFood.ID) {
+        foundFood.ID = plantity;
+        foundFood.distance = Math.sqrt(Math.pow(world.plantities[plantity].sprite.x - this.sprite.x, 2) + Math.pow(world.plantities[plantity].sprite.y - this.sprite.y, 2));
       }
 
-      let newFoodDistance = Math.sqrt(Math.pow(plantity.sprite.x - this.sprite.x, 2) + Math.pow(plantity.sprite.y - this.sprite.y, 2));
-      let foundFoodDistance = Math.sqrt(Math.pow(foundFood.x - this.sprite.x, 2) + Math.pow(foundFood.y - this.sprite.y, 2));
+      let newFoodDistance = Math.sqrt(Math.pow(world.plantities[plantity].sprite.x - this.sprite.x, 2) + Math.pow(world.plantities[plantity].sprite.y - this.sprite.y, 2));
 
-      if (newFoodDistance < foundFoodDistance) {
-        foundFood = plantity.sprite;
+      if (newFoodDistance < foundFood.distance) {
+        foundFood.ID = plantity;
+        foundFood.distance = newFoodDistance;
       }
     }, this);
 
@@ -238,10 +241,11 @@ class Antity {
   }
 
   move() {
+    let target = world.plantities[this.targetID.ID].sprite;
     let startX = this.sprite.x;
     let startY = this.sprite.y;
-    let endX = this.target.x;
-    let endY = this.target.y;
+    let endX = target.x;
+    let endY = target.y;
     let speed = this.speed;
     let elapsed = world.elapsed;
 
