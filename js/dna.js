@@ -37,6 +37,12 @@ document.body.appendChild(renderer.view);
 
 let worldStage = new Container();
 
+let plantityBiome = new Container();
+worldStage.addChild(plantityBiome);
+
+let antityBiome = new Container();
+worldStage.addChild(antityBiome);
+
 loader
   .add('antity-type1-genome', 'js/antity-type1-genome.json?' + n)
   .add('antity-type2-genome', 'js/antity-type2-genome.json?' + n)
@@ -71,12 +77,12 @@ function setup() {
     }
   }
 
-  world.antities.forEach(function(element) {
-    worldStage.addChild(element.sprite);
+  world.plantities.forEach(function(element) {
+    plantityBiome.addChild(element.sprite);
   }, this);
 
-  world.plantities.forEach(function(element) {
-    worldStage.addChild(element.sprite);
+  world.antities.forEach(function(element) {
+    antityBiome.addChild(element.sprite);
   }, this);
 
   animate();
@@ -139,7 +145,6 @@ class Antity {
       if (bump.hit(this.sprite, plantity.sprite)) {
         if (plantity.isAlive) {
           this.status = 'eating';
-          this.isMoving = false;
           this.meal = plantity;
         } else {
           this.status = 'hungry';
@@ -150,14 +155,16 @@ class Antity {
 
     switch(this.status) {
       case 'eating':
+        this.isMoving = false;
         if (this.meal.energy > 0) {
-          this.meal.energy--;
+          this.meal.energy -= 10;
         } else {
           this.status = 'hungry';
           this.meal = null;
         }
         break;
       case 'hunting':
+        this.isMoving = true;
         break;
       case 'hungry':
         let foodTarget = this.findFoodTarget();
