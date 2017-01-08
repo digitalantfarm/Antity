@@ -96,13 +96,6 @@ function animate() {
   renderer.render(worldStage);
 }
 
-$('body').click(function(e) {
-  e.preventDefault();
-
-  world.target.x = e.offsetX;
-  world.target.y = e.offsetY;
-});
-
 /****************
  * Class Antity *
  ****************/
