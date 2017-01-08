@@ -115,6 +115,8 @@ class Antity {
 
     this.createGenotype();
 
+    this.isAlive = true;
+
     this.circular = true;
 
     this.sprite.scale.set(this.size / 50, this.size / 50);
@@ -133,41 +135,46 @@ class Antity {
 
   update() {
 
+    world.plantities.forEach(function(plantity) {
+      if (bump.hit(this.sprite, plantity.sprite)) {
+        if (plantity.isAlive) {
+          this.status = 'eating';
+          this.isMoving = false;
+          this.meal = plantity;
+        } else {
+          this.status = 'hungry';
+          this.meal = null;
+        }
+      }
+    }, this);
+
     switch(this.status) {
-      case 'hungry':
-        let foodTarget = this.findFoodTarget();
-        this.target = foodTarget;
-        this.isMoving = true;
-        this.status = 'hunting';
-        break;
       case 'eating':
         if (this.meal.energy > 0) {
           this.meal.energy--;
         } else {
-          this.meal.sprite.visible = false;
           this.status = 'hungry';
           this.meal = null;
         }
         break;
       case 'hunting':
         break;
+      case 'hungry':
+        let foodTarget = this.findFoodTarget();
+        this.target = foodTarget;
+        this.status = 'hunting';
+        this.isMoving = true;
+        break;
       default:
+        this.status = 'hungry';
         break;
     }
 
     if (this.isMoving) {
+      if (this.target == undefined || this.target == null) {
+        this.status = 'hungry';
+      }
       this.move();
-      world.plantities.forEach(function(plantity) {
-        if (this.sprite == null) {
-          // Oh
-        } else {
-          if (bump.hit(this.sprite, plantity.sprite)) {
-            this.status = 'eating';
-            this.meal = plantity;
-            this.isMoving = false;
-          }
-        }
-      }, this);
     }
 
   }
@@ -278,6 +285,8 @@ class Plantity {
 
     this.createGenotype();
 
+    this.isAlive = true;
+
     this.circular = true;
 
     this.size = this.energy / 10;
@@ -288,8 +297,13 @@ class Plantity {
   }
 
   update() {
-    this.size = this.energy / 10;
-    this.sprite.scale.set(this.size / 100, this.size / 100);
+    if (this.energy <= 0) {
+      this.sprite.visible = false;
+      this.isAlive = false;
+    } else {
+      this.size = this.energy / 10;
+      this.sprite.scale.set(this.size / 100, this.size / 100);
+    }
   }
 
   createGenotype() {
