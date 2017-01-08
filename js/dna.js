@@ -180,38 +180,22 @@ class Antity {
   }
 
   findFoodTarget() {
-    let nearbyFood = {
-      x: 0,
-      y: 0,
-      xDiff: 0,
-      yDiff: 0,
-      targetFood: null
-    };
+    let foundFood = {};
 
-    world.plantities.forEach(function(plantity, index) {
-    let xDiff = (plantity.sprite.x - this.sprite.x) * -1;
-    let yDiff = (plantity.sprite.y - this.sprite.y) * -1;
-      let candidate = ( ( xDiff * -1) < (yDiff * -1) ? 'x' : 'y' );
-
-      if (xDiff < nearbyFood.xDiff) {
-        nearbyFood.x = plantity.sprite.x;
-        nearbyFood.xDiff = xDiff;
-        nearbyFood.targetFood = (candidate == 'x' ? index : nearbyFood.targetFood);
-        if (candidate == 'x') {
-          nearbyFood.y = plantity.sprite.y;
-        }
+    world.plantities.forEach(function(plantity) {
+      if (!foundFood.x) {
+        foundFood = plantity.sprite;
       }
-      if (plantity.sprite.y - this.sprite.y < nearbyFood.yDiff) {
-        nearbyFood.y = plantity.sprite.y;
-        nearbyFood.yDiff = yDiff;
-        nearbyFood.targetFood = (candidate == 'y' ? index : nearbyFood.targetFood);
-        if (candidate == 'y') {
-          nearbyFood.x = plantity.sprite.x;
-        }
+
+      let newFoodDistance = Math.sqrt(Math.pow(plantity.sprite.x - this.sprite.x, 2) + Math.pow(plantity.sprite.y - this.sprite.y, 2));
+      let foundFoodDistance = Math.sqrt(Math.pow(foundFood.x - this.sprite.x, 2) + Math.pow(foundFood.y - this.sprite.y, 2));
+
+      if (newFoodDistance < foundFoodDistance) {
+        foundFood = plantity.sprite;
       }
     }, this);
 
-    return nearbyFood;
+    return foundFood;
   }
 
   createGenotype() {
@@ -298,7 +282,7 @@ class Plantity {
 
   update() {
     if (this.energy <= 0) {
-      this.sprite.visible = false;
+      //this.sprite.visible = false;
       this.isAlive = false;
     } else {
       this.size = this.energy / 10;
