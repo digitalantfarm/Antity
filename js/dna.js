@@ -142,7 +142,7 @@ class Antity {
 
     this.mealID = null;
 
-    this.status = 'hungry';
+    this.status = 'wandering';
   }
 
   update() {
