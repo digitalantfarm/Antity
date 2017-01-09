@@ -48,7 +48,7 @@ loader
   .add('antity-type1-genome', 'js/antity-type1-genome.json?' + n)
   .add('antity-type2-genome', 'js/antity-type2-genome.json?' + n)
   .add('plantity-type1-genome', 'js/plantity-type1-genome.json?' + n)
-  .add('img/antity-sprite-simple.png')
+  .add('img/antity-sprite-blur.png')
   .load(setup);
 
 function setup() {
@@ -117,7 +117,7 @@ class Antity {
     this.dna = resources[genome].data;
     this.genotype = {};
 
-    this.sprite = new Sprite(frame('img/antity-sprite-simple.png', 0, 0, 32, 32));
+    this.sprite = new Sprite(frame('img/antity-sprite-blur.png', 0, 0, 256, 256));
     this.sprite.anchor.set(0.5, 0.5);
 
     let randomX = Math.floor((Math.random() * world.dimensions.width) + 1);
@@ -131,7 +131,7 @@ class Antity {
 
     this.circular = true;
 
-    this.sprite.scale.set(this.size / 50, this.size / 50);
+    this.sprite.scale.set(this.size / 1000, this.size / 1000);
 
     this.sprite.tint = stringToColour(this.genotype.diet + this.genotype.personality);
     BlurFilter.blur = 25;
@@ -320,7 +320,7 @@ class Plantity {
     this.dna = resources[genome].data;
     this.genotype = {};
 
-    this.sprite = new Sprite(frame('img/antity-sprite-simple.png', 0, 0, 32, 32));
+    this.sprite = new Sprite(frame('img/antity-sprite-blur.png', 0, 0, 256, 256));
     this.sprite.anchor.set(0.5, 0.5);
 
     let randomX = Math.floor((Math.random() * world.dimensions.width) + 1);
@@ -335,7 +335,7 @@ class Plantity {
 
     this.size = this.energy / 10;
 
-    this.sprite.scale.set(this.size / 100, this.size / 100);
+    this.sprite.scale.set(this.size / 1000, this.size / 1000);
 
     this.sprite.tint = this.genotype.colour;
 
@@ -350,7 +350,7 @@ class Plantity {
       this.sprite.visible = false;
     } else {
       this.size = this.energy / 10;
-      this.sprite.scale.set(this.size / 100, this.size / 100);
+      this.sprite.scale.set(this.size / 1000, this.size / 1000);
     }
   }
 
