@@ -134,6 +134,9 @@ class Antity {
     this.sprite.scale.set(this.size / 50, this.size / 50);
 
     this.sprite.tint = stringToColour(this.genotype.diet + this.genotype.personality);
+    BlurFilter.blur = 25;
+    this.sprite.filters = new Array();
+    this.sprite.filters.push(BlurFilter);
 
     this.targetID = null;
 
@@ -335,6 +338,10 @@ class Plantity {
     this.sprite.scale.set(this.size / 100, this.size / 100);
 
     this.sprite.tint = this.genotype.colour;
+
+    BlurFilter.blur = 25;
+    this.sprite.filters = new Array();
+    this.sprite.filters.push(BlurFilter);
   }
 
   update() {
