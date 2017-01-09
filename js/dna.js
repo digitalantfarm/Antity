@@ -422,7 +422,7 @@ function stringToColour(str) {
   return colour;
 }
 
-$('body').click(function(e) {
+$(document).click(function(e) {
   let newPlantityID = uuid.v4();
   world.plantities[newPlantityID] = new Plantity('plantity-type1-genome');
   plantityBiome.addChild(world.plantities[newPlantityID].sprite);
