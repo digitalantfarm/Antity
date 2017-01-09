@@ -1,5 +1,6 @@
 var d = new Date();
 var n = d.getTime();
+var timerDisplay = $('#worldTimer');
 
 let Container = PIXI.Container
   , ParticleContainer = PIXI.ParticleContainer
@@ -101,6 +102,9 @@ function animate() {
     world.plantities[element].update();
   }, this);
 
+  let nD = new Date();
+  let nN = (nD.getHours() < 10 ? '0' : '') + nD.getHours() + ':' + (nD.getMinutes() < 10 ? '0' : '') + nD.getMinutes() + ':' + (nD.getSeconds() < 10 ? '0' : '') + nD.getSeconds() + '.' + (nD.getMilliseconds() < 10 ? '00' : (nD.getMilliseconds() < 100 ? '0' : '')) + nD.getMilliseconds();
+  timerDisplay.html(nN);
   renderer.render(worldStage);
 }
 

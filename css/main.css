@@ -190,6 +190,15 @@ h1 {
     z-index: 1000;
 }
 
+#worldTimer {
+    position: absolute;
+    right: 50px;
+    bottom: 25px;
+    z-index: 1000;
+    color: #ffffff;
+    text-align: right;
+}
+
 #world {
     z-index: 10;
 }
