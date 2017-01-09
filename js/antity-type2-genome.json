@@ -1,0 +1,48 @@
+{
+    "chromosomes": [
+        {
+            "genes": [
+                {
+                    "speed": 10,
+                    "isDominant": true
+                },
+                {
+                    "speedDeviation": 3,
+                    "isDominant": false
+                },
+                {
+                    "diet": "carnivore",
+                    "isDominant": false
+                },
+                {
+                    "size": 30,
+                    "isDominant": true
+                },
+                {
+                    "sizeDeviation": 10,
+                    "isDominant": false
+                },
+                {
+                    "personality": "social",
+                    "isDominant": false
+                },
+                {
+                    "maturation": 10,
+                    "isDominant": true
+                },
+                {
+                    "maturationDeviation": 2,
+                    "isDominant": false
+                },
+                {
+                    "energy": 250,
+                    "isDominant": true
+                },
+                {
+                    "energyDeviation": 25,
+                    "isDominant": true
+                }
+            ]
+        }
+    ]
+}

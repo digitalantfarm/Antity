@@ -1,0 +1,38 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <title>Antity</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <link rel="stylesheet" href="css/normalize.min.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <h1>Antity</h1>
+
+        <div id="world"></div>
+
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+        <script>
+        let worldSize = {width: $(window).width(), height: $(window).height()};
+        console.log(worldSize);
+
+        function countities() {
+            let antities = 0;
+            for ( let i = 0; i < worldSize.width; i++ ) {
+                for ( let j = 0; j < worldSize.height; j++ ) {
+                    //console.log(i + ':' + j);
+                    antities++;
+                }
+            }
+            console.log(antities);
+        }
+
+        countities();
+        </script>
+    </body>
+</html>

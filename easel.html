@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Antity</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <link rel="stylesheet" href="css/normalize.min.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+
+    <body>
+        <h1>Antity</h1>
+        <canvas id="worldStage" width="894" height="799"></canvas>
+        <script>
+            window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')
+        </script>
+        <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+        <!--<script src="js/byproduct.js"></script>-->
+        <!--<script src="js/antity.js"></script>-->
+        <script src="js/vendor/uuid.js"></script>
+        <script>
+        jQuery(document).ready(function($) {
+            /*
+            let worldWidth = $(window).width();
+            let worldHeight = $(window).height();
+            let world = $('#worldStage');
+            world.width(worldWidth);
+            world.height(worldHeight);
+            */
+
+            let stage = new createjs.Stage('worldStage');
+
+            let circle = new createjs.Shape();
+            circle.graphics.beginFill('DeepSkyBlue').drawCircle(0, 0, 50);
+            circle.x = 100;
+            circle.y = 100;
+            stage.addChild(circle);
+
+            stage.update();
+        });
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Terra</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <link rel="stylesheet" href="css/normalize.min.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+
+    <body>
+        <script>
+            window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')
+        </script>
+        <script src="//cdn.jsdelivr.net/terra/latest/mainfile"></script>
+        <script>
+        jQuery(document).ready(function($) {
+          let terra = window.terra;
+
+          terra.registerCreature({
+            type: 'simpleCreature1',
+            actionRadius: 1,
+            color: [0, 170, 255],
+            efficiency: 0.6,
+            initialEnergy: 50,
+            maxEnergy: 100,
+            sustainability: 6,
+            reproduceLv: 0.8,
+            size: 50
+          });
+
+          /*
+          terra.registerCreature({
+            type: 'simpleCreature2',
+            actionRadius: 2,
+            color: [255, 170, 0],
+            efficiency: 0.8,
+            initialEnergy: 100,
+            maxEnergy: 150,
+            sustainability: 4,
+            reproduceLv: 0.5,
+            size: 25
+          });
+          */
+
+          terra.registerCreature({
+            type: 'simplePlant',
+            actionRadius: 1,
+            color: [0, 128, 51],
+            reproduceLv: 0.8,
+            wait: function() {
+              this.energy += 2;
+            },
+            move: false,
+            size: 1,
+          });
+
+          let cellSize = 8;
+          let tWidth = $(window).width() / cellSize;
+          let tHeight = $(window).height() / cellSize;
+
+          var world = new terra.Terrarium(tWidth, tHeight, {
+            id: 'world',
+            cellSize: cellSize,
+            periodic: true
+          });
+          world.grid = world.makeGridWithDistribution([
+            ['simpleCreature1', 1],
+//            ['simpleCreature2', 1],
+            ['simplePlant', 99]
+          ]);
+
+          world.animate();
+        });
+        </script>
+    </body>
+
+</html>

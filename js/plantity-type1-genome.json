@@ -1,0 +1,40 @@
+{
+    "chromosomes": [
+        {
+            "genes": [
+                {
+                    "colour": "0x88cc44",
+                    "isDominant": true
+                },
+                {
+                    "flavour": "sweet",
+                    "isDominant": true
+                },
+                {
+                    "size": 60,
+                    "isDominant": true
+                },
+                {
+                    "sizeDeviation": 20,
+                    "isDominant": false
+                },
+                {
+                    "maturation": 10,
+                    "isDominant": true
+                },
+                {
+                    "maturationDeviation": 2,
+                    "isDominant": false
+                },
+                {
+                    "energy": 1000,
+                    "isDominant": true
+                },
+                {
+                    "energyDeviation": 250,
+                    "isDominant": true
+                }
+            ]
+        }
+    ]
+}
