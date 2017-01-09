@@ -243,8 +243,8 @@ class Antity {
 
   findRandomLocation() {
     let coords = {
-      x: Math.floor(Math.random() * world.dimensions.width),
-      y: Math.floor(Math.random() * world.dimensions.height)
+      x: Math.floor((Math.random() * world.dimensions.width) + 1),
+      y: Math.floor((Math.random() * world.dimensions.height) + 1)
     };
 
     return coords;
