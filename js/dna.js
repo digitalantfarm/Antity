@@ -154,12 +154,20 @@ class Antity {
         }
         break;
       case 'hungry':
-        let foodTarget = this.findFoodTarget();
-        this.targetID = foodTarget;
         this.isMoving = true;
-        this.status = 'hunting';
+        let foodTarget = this.findFoodTarget();
+        if (foodTarget == null) {
+          this.targetID = null;
+          this.status = 'wandering';
+        } else {
+          this.targetID = foodTarget;
+          this.status = 'hunting';
+        }
         break;
       case 'hunting':
+        this.isMoving = true;
+        break;
+      case 'wandering':
         this.isMoving = true;
         break;
       default:
@@ -174,13 +182,21 @@ class Antity {
         this.mealID = collisionID;
         this.isMoving = false;
         this.status = 'eating';
-      } else if (this.targetID == undefined || this.targetID == null) {
-        this.isMoving = false;
-        this.status = 'hungry';
-      } else if (!world.plantities[this.targetID].isAlive) {
+      } else if (this.targetID != null && !world.plantities[this.targetID].isAlive) {
         this.status = 'hungry';
       } else {
-        this.move();
+        if (this.status == 'wandering') {
+          let chance = Math.random();
+          if (this.destination == undefined) {
+            this.destination = this.findRandomLocation();
+          }
+          if (chance < 0.01) {
+            this.destination = this.findRandomLocation();
+          }
+          this.move(this.destination);
+        } else {
+          this.move(world.plantities[this.targetID].sprite);
+        }
       }
     }
   }
@@ -222,6 +238,15 @@ class Antity {
     return foundFood;
   }
 
+  findRandomLocation() {
+    let coords = {
+      x: Math.floor(Math.random() * world.dimensions.width),
+      y: Math.floor(Math.random() * world.dimensions.height)
+    };
+
+    return coords;
+  }
+
   createGenotype() {
     let deviations = {};
     this.dna.chromosomes.forEach(function(chromosome) {
@@ -254,8 +279,7 @@ class Antity {
     }, this);
   }
 
-  move() {
-    let target = world.plantities[this.targetID].sprite;
+  move(target) {
     let startX = this.sprite.x;
     let startY = this.sprite.y;
     let endX = target.x;
@@ -316,6 +340,7 @@ class Plantity {
   update() {
     if (this.energy <= 0) {
       this.isAlive = false;
+      this.sprite.visible = false;
     } else {
       this.size = this.energy / 10;
       this.sprite.scale.set(this.size / 100, this.size / 100);
