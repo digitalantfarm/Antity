@@ -188,6 +188,8 @@ h1 {
     left: 50px;
     top: 25px;
     z-index: 1000;
+    text-shadow: 0 0 3px #000000;
+    color: #ffffff;
 }
 
 #worldTimer {
@@ -195,6 +197,7 @@ h1 {
     right: 50px;
     bottom: 25px;
     z-index: 1000;
+    text-shadow: 0 0 3px #000000;
     color: #ffffff;
     text-align: right;
 }
