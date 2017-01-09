@@ -143,19 +143,6 @@ class Antity {
   }
 
   update() {
-
-    Object.keys(world.plantities).forEach(function(plantity) {
-      if (bump.hit(this.sprite, world.plantities[plantity].sprite)) {
-        if (world.plantities[plantity].isAlive) {
-          this.status = 'eating';
-          this.mealID = plantity;
-        } else {
-          this.status = 'hungry';
-          this.mealID = null;
-        }
-      }
-    }, this);
-
     switch(this.status) {
       case 'eating':
         this.isMoving = false;
@@ -166,13 +153,13 @@ class Antity {
           this.mealID = null;
         }
         break;
-      case 'hunting':
-        this.isMoving = true;
-        break;
       case 'hungry':
         let foodTarget = this.findFoodTarget();
         this.targetID = foodTarget;
+        this.isMoving = true;
         this.status = 'hunting';
+        break;
+      case 'hunting':
         this.isMoving = true;
         break;
       default:
@@ -181,31 +168,54 @@ class Antity {
     }
 
     if (this.isMoving) {
-      if (this.targetID == undefined || this.targetID == null) {
+      let collisionID = this.hasCollision();
+      if (collisionID) {
+        this.targetID = collisionID;
+        this.mealID = collisionID;
+        this.isMoving = false;
+        this.status = 'eating';
+      } else if (this.targetID == undefined || this.targetID == null) {
+        this.isMoving = false;
         this.status = 'hungry';
+      } else if (!world.plantities[this.targetID].isAlive) {
+        this.status = 'hungry';
+      } else {
+        this.move();
       }
-      this.move();
     }
+  }
 
+  hasCollision() {
+    let ID = false;
+
+    Object.keys(world.plantities).forEach(function(plantity) {
+      if (world.plantities[plantity].isAlive) {
+        if (bump.hit(this.sprite, world.plantities[plantity].sprite)) {
+          ID = plantity;
+        }
+      }
+    }, this);
+
+    return ID;
   }
 
   findFoodTarget() {
-    let foundFood = {
-      ID: null,
-      distance: null
-    };
+    let foundFood = null;
+    let foodDistance = null;
 
     Object.keys(world.plantities).forEach(function(plantity) {
-      if (!foundFood.ID) {
-        foundFood.ID = plantity;
-        foundFood.distance = Math.sqrt(Math.pow(world.plantities[plantity].sprite.x - this.sprite.x, 2) + Math.pow(world.plantities[plantity].sprite.y - this.sprite.y, 2));
-      }
+      if (world.plantities[plantity].isAlive) {
+        if (!foundFood) {
+          foundFood = plantity;
+          foodDistance = Math.sqrt(Math.pow(world.plantities[plantity].sprite.x - this.sprite.x, 2) + Math.pow(world.plantities[plantity].sprite.y - this.sprite.y, 2));
+        }
 
-      let newFoodDistance = Math.sqrt(Math.pow(world.plantities[plantity].sprite.x - this.sprite.x, 2) + Math.pow(world.plantities[plantity].sprite.y - this.sprite.y, 2));
+        let newFoodDistance = Math.sqrt(Math.pow(world.plantities[plantity].sprite.x - this.sprite.x, 2) + Math.pow(world.plantities[plantity].sprite.y - this.sprite.y, 2));
 
-      if (newFoodDistance < foundFood.distance) {
-        foundFood.ID = plantity;
-        foundFood.distance = newFoodDistance;
+        if (newFoodDistance < foodDistance) {
+          foundFood = plantity;
+          foodDistance = newFoodDistance;
+        }
       }
     }, this);
 
@@ -245,7 +255,7 @@ class Antity {
   }
 
   move() {
-    let target = world.plantities[this.targetID.ID].sprite;
+    let target = world.plantities[this.targetID].sprite;
     let startX = this.sprite.x;
     let startY = this.sprite.y;
     let endX = target.x;
@@ -254,18 +264,26 @@ class Antity {
     let elapsed = world.elapsed;
 
     let distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-    let directionX = (endX - startX) / distance;
-    let directionY = (endY - startY) / distance;
 
-    if (this.isMoving) {
-      this.sprite.x += directionX * speed * elapsed;
-      this.sprite.y += directionY * speed * elapsed;
+    if (distance > 0) {
+      let directionX = (endX - startX) / distance;
+      let directionY = (endY - startY) / distance;
 
-      if (Math.sqrt(Math.pow(this.sprite.x - startX, 2) + Math.pow(this.sprite.y - startY, 2)) >= distance) {
-        this.sprite.x = endX;
-        this.sprite.y = endY;
-        this.isMoving = false;
+      if (this.isMoving) {
+        let movementX = directionX * speed * elapsed;
+        let movementY = directionY * speed * elapsed;
+
+        this.sprite.x += movementX;
+        this.sprite.y += movementY;
+
+        if (Math.sqrt(Math.pow(this.sprite.x - startX, 2) + Math.pow(this.sprite.y - startY, 2)) >= distance) {
+          this.sprite.x = endX;
+          this.sprite.y = endY;
+          this.isMoving = false;
+        }
       }
+    } else {
+      this.isMoving = false;
     }
   }
 }
@@ -297,7 +315,6 @@ class Plantity {
 
   update() {
     if (this.energy <= 0) {
-      //this.sprite.visible = false;
       this.isAlive = false;
     } else {
       this.size = this.energy / 10;
