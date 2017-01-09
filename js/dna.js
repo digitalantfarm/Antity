@@ -152,7 +152,7 @@ class Antity {
         if (world.plantities[this.mealID].energy > 0) {
           world.plantities[this.mealID].energy -= 10;
         } else {
-          this.status = 'hungry';
+          this.status = 'wandering';
           this.mealID = null;
         }
         break;
@@ -174,7 +174,7 @@ class Antity {
         this.isMoving = true;
         break;
       default:
-        this.status = 'hungry';
+        this.status = 'wandering';
         break;
     }
 
@@ -185,8 +185,6 @@ class Antity {
         this.mealID = collisionID;
         this.isMoving = false;
         this.status = 'eating';
-      } else if (this.targetID != null && !world.plantities[this.targetID].isAlive) {
-        this.status = 'hungry';
       } else {
         if (this.status == 'wandering') {
           let chance = Math.random();
