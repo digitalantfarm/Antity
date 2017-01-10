@@ -63,6 +63,7 @@ function setup() {
     switch(true) {
       case (selectOrganism < 1):
         world.plantities[newPlantityID] = new Plantity('plantity-type1-genome');
+        world.plantities[newPlantityID].ID = newPlantityID;
         break;
     }
   }
@@ -73,9 +74,11 @@ function setup() {
     switch(true) {
       case (selectOrganism < 0.5):
         world.antities[newAntityID] = new Antity('antity-type1-genome');
+        world.antities[newAntityID].ID = newAntityID;
         break;
       case (selectOrganism < 1):
         world.antities[newAntityID] = new Antity('antity-type2-genome');
+        world.antities[newAntityID].ID = newAntityID;
         break;
     }
   }
@@ -146,74 +149,99 @@ class Antity {
   }
 
   update() {
-    switch(this.status) {
-      case 'eating':
-        this.isMoving = false;
-        if (world.plantities[this.mealID].energy > 0) {
-          world.plantities[this.mealID].energy -= 10;
-        } else {
+    if (this.energy <= 0) {
+      this.isAlive = false;
+      this.sprite.visible = false;
+    } else {
+      switch(this.status) {
+        case 'eating':
+          this.isMoving = false;
+          if (this.diet == 'herbivore' && world.plantities[this.mealID].energy > 0) {
+            world.plantities[this.mealID].energy -= 10;
+          } else if (this.diet == 'carnivore' && world.antities[this.mealID].energy > 0) {
+            world.antities[this.mealID].energy -= 10;
+          } else {
+            this.status = 'wandering';
+            this.mealID = null;
+          }
+          break;
+        case 'hungry':
+          this.isMoving = true;
+          let foodTarget = this.findFoodTarget();
+          if (foodTarget == null) {
+            this.targetID = null;
+            this.status = 'wandering';
+          } else {
+            this.targetID = foodTarget;
+            this.status = 'hunting';
+          }
+          break;
+        case 'hunting':
+          this.isMoving = true;
+          break;
+        case 'wandering':
+          this.isMoving = true;
+          break;
+        default:
           this.status = 'wandering';
-          this.mealID = null;
-        }
-        break;
-      case 'hungry':
-        this.isMoving = true;
-        let foodTarget = this.findFoodTarget();
-        if (foodTarget == null) {
-          this.targetID = null;
-          this.status = 'wandering';
-        } else {
-          this.targetID = foodTarget;
-          this.status = 'hunting';
-        }
-        break;
-      case 'hunting':
-        this.isMoving = true;
-        break;
-      case 'wandering':
-        this.isMoving = true;
-        break;
-      default:
-        this.status = 'wandering';
-        break;
-    }
+          break;
+      }
 
-    if (this.isMoving) {
-      let collisionID = this.hasCollision();
-      if (collisionID) {
-        this.targetID = collisionID;
-        this.mealID = collisionID;
-        this.isMoving = false;
-        this.status = 'eating';
-      } else {
-        if (this.status == 'wandering') {
-          let chance = Math.random();
-          if (this.destination == undefined) {
-            this.destination = this.findRandomLocation();
-          }
-          if (chance < 0.01) {
-            this.destination = this.findRandomLocation();
-          }
-          this.move(this.destination);
+      if (this.isMoving) {
+        let collisionObject = this.hasCollision();
+        if (this.diet == 'herbivore' && collisionObject.type == 'plantity') {
+          this.targetID = collisionObject.ID;
+          this.mealID = collisionObject.ID;
+          this.isMoving = false;
+          this.status = 'eating';
+        } else if (this.diet == 'carnivore' && collisionObject.type == 'antity') {
+          this.targetID = collisionObject.ID;
+          this.mealID = collisionObject.ID;
+          this.isMoving = false;
+          this.status = 'eating';
         } else {
-          this.move(world.plantities[this.targetID].sprite);
+          if (this.status == 'wandering') {
+            let chance = Math.random();
+            if (this.destination == undefined) {
+              this.destination = this.findRandomLocation();
+            }
+            if (chance < 0.01) {
+              this.destination = this.findRandomLocation();
+            }
+            this.move(this.destination);
+          } else {
+            this.move(world.plantities[this.targetID].sprite);
+          }
         }
       }
     }
   }
 
   hasCollision() {
-    let ID = false;
+    let collisionObject = {
+      ID: null,
+      type: null
+    };
 
-    Object.keys(world.plantities).forEach(function(plantity) {
-      if (world.plantities[plantity].isAlive) {
-        if (bump.hit(this.sprite, world.plantities[plantity].sprite)) {
-          ID = plantity;
+    Object.keys(world.antities).forEach(function(antity) {
+      if (world.antities[antity].isAlive && this.ID != antity) {
+        if (bump.hit(this.sprite, world.antities[antity].sprite)) {
+          collisionObject.ID = antity;
+          collisionObject.type = 'antity';
         }
       }
     }, this);
 
-    return ID;
+    Object.keys(world.plantities).forEach(function(plantity) {
+      if (world.plantities[plantity].isAlive) {
+        if (bump.hit(this.sprite, world.plantities[plantity].sprite)) {
+          collisionObject.ID = plantity;
+          collisionObject.type = 'plantity';
+        }
+      }
+    }, this);
+
+    return collisionObject;
   }
 
   findFoodTarget() {
