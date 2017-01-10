@@ -194,7 +194,7 @@ class Antity {
           this.mealID = collisionObject.ID;
           this.isMoving = false;
           this.status = 'eating';
-        } else if (this.diet == 'carnivore' && collisionObject.type == 'antity') {
+        } else if (this.diet == 'carnivore' && collisionObject.type == 'antity' && this.size > world.antities[collisionObject.ID].size) {
           this.targetID = collisionObject.ID;
           this.mealID = collisionObject.ID;
           this.isMoving = false;
