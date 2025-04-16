@@ -28,38 +28,45 @@
 
 ## What's Left to Build
 
-### AI & Behavior Enhancement
-- ❌ Neural networks for learning behaviors
-- ❌ More complex movement patterns beyond random changes
-- ❌ Environment awareness for entities
-- ❌ Entity-to-entity interactions and recognition
-- ❌ Adaptive behaviors based on conditions
+### Phase 1: AI & Behavior Enhancement (Next Up)
+- ❌ Steering behaviors for more natural movement
+- ❌ Position memory to avoid repetitive patterns
+- ❌ Environmental awareness for entities
+- ❌ More complex decision making based on surroundings
 
-### Visual Improvements
-- ❌ More sophisticated animations for entities
-- ❌ Visual effects for important events (hatching, death)
-- ❌ Different visual representations based on behavior
-- ❌ Background elements or environment visualization
+### Phase 2: Visual Improvements
+- ❌ Enhanced sprite animations with multiple frames
+- ❌ Visual effects for key events (hatching, death)
+- ❌ State-based visual indicators (young, mature, old)
+- ❌ Improved movement animations and transitions
 
-### Interaction Enhancements
-- ❌ User controls for simulation parameters
-- ❌ Ability to influence environment conditions
-- ❌ Ways to select and track specific entities
-- ❌ More sophisticated UI elements and information display
-
-### Technical Optimizations
-- ❌ Worker pooling for better performance
-- ❌ More efficient message passing
-- ❌ Spatial partitioning for large numbers of entities
+### Phase 3: Performance Optimization
+- ❌ Worker pooling for better resource management
+- ❌ Spatial partitioning for efficient rendering
+- ❌ Object pooling for frequently created elements
 - ❌ Better memory management for long-running simulations
 
-## Current Status
-The project is in a **functional prototype stage** with the core concepts implemented:
-- Basic entity movement, reproduction, and lifecycle are working
-- Visual representation is simple but effective
-- Interactive elements allow basic user engagement
+### Phase 4: User Interaction Enhancements
+- ❌ Simulation control panel (speed, entity limits, pause)
+- ❌ Entity parameter controls (lifespan, movement, fertility)
+- ❌ Environmental influence tools (food, barriers)
+- ❌ Advanced UI elements and information display
 
-The simulation creates an interesting visual experience but currently lacks the more sophisticated AI behaviors mentioned in the project description. The groundwork is laid for adding these features in future development.
+### Future Considerations
+- ❌ Neural networks for learning behaviors
+- ❌ Entity-to-entity interactions and recognition
+- ❌ Different entity types with specialized behaviors
+- ❌ Advanced environmental factors and conditions
+
+## Current Status
+The project is transitioning from a **functional prototype stage** to an **enhanced development phase** with the following timeline:
+
+- **Week 1**: AI enhancement implementation
+- **Week 2**: Visual improvements implementation
+- **Week 3**: Performance optimization implementation
+- **Week 4**: User interaction enhancements implementation
+
+A detailed development plan has been created in `dev-plan.md` that outlines specific code changes and implementation approaches for each focus area.
 
 ## Known Issues
 
@@ -88,15 +95,16 @@ The first version focused on creating a basic working system with:
 - Functional interactivity
 
 ### Current Direction
-The project is now at a point where foundational systems are in place, allowing focus to shift toward:
-1. Implementing more sophisticated behaviors
-2. Improving visual representation
-3. Enhancing user interaction options
-4. Optimizing performance for larger populations
+The project is now advancing to address the key limitations of the initial implementation:
+1. **Moving beyond randomness** to more sophisticated behaviors
+2. **Enhancing visual representation** with more animations and effects
+3. **Optimizing performance** for larger entity populations
+4. **Expanding user interaction** with more control options
 
-### Future Considerations
-As the project evolves, key decisions will need to be made about:
-- Balance between visual complexity and performance
-- Types of AI behaviors to implement
-- Level of user control vs. system autonomy
-- Potential for environmental factors and their influence
+### Development Approach
+The implementation strategy prioritizes:
+- Building on the existing foundation rather than complete rewrites
+- Modular enhancements that can be selectively implemented
+- Regular performance testing throughout development
+- Maintaining the core aesthetic while adding complexity
+- Preserving the decoupled architecture while enhancing communication

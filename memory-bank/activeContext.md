@@ -1,71 +1,91 @@
 # Active Context: Antity
 
 ## Current Work Focus
-The project is currently in its initial implementation phase, focusing on:
+The project is transitioning from its initial implementation phase to a more advanced development stage with the following focus areas:
 
-1. **Core Movement & Behavior Systems**: The fundamental mechanics for entity movement, byproduct generation, and reproduction are implemented with randomness-based behaviors.
+1. **AI Enhancement**: Moving beyond simple randomness to more sophisticated entity behaviors including steering, environmental awareness, and memory.
 
-2. **Visual Representation**: Basic sprite rendering with PIXI.js is in place, with simple animations for movement and state changes.
+2. **Visual Improvements**: Enhancing the visual representation with more animations, state-based visual indicators, and event-based effects.
 
-3. **Life Cycle Management**: Entities have a defined lifespan, can create byproducts that sometimes become fertile, and the system maintains population through self-resurrection when needed.
+3. **Performance Optimization**: Addressing performance concerns with worker pooling, spatial partitioning, and object pooling for better resource management.
+
+4. **User Interaction Expansion**: Adding more control options, parameter adjustments, and environmental influences to increase user engagement.
 
 ## Recent Changes
-As this is the initial documentation of the project, no recent changes are tracked yet. The code represents the first implementation of the Antity concept with:
+A detailed development plan has been created that outlines specific implementations for each focus area:
 
-- Entities that move with random direction changes
-- Byproduct generation with random fertility
-- Basic life cycle with birth, movement, and death
-- Simple click-to-spawn interaction
+- Added `dev-plan.md` with concrete code examples and implementation approaches for all planned enhancements
+- Analyzed current code structure to identify optimal integration points for new features
+- Organized implementation in a phased approach with realistic timelines
+- Prioritized enhancements that build on existing architecture without requiring complete rewrites
 
 ## Next Steps
-Immediate priorities for project development include:
+The implementation will proceed in four phases according to the development plan:
 
-1. **AI Development**: Begin implementing more sophisticated behaviors beyond simple randomness.
-   
-2. **Visual Enhancements**: Improve the visual representation with more sophisticated animations and effects.
+### Phase 1: Core AI Enhancement (Week 1)
+1. Implement steering behaviors to replace purely random movement
+2. Add position history and memory mechanisms
+3. Create environmental awareness capabilities
+4. Test and tune basic behaviors
 
-3. **Optimization**: Address potential performance issues with many entities by implementing better worker management and rendering optimizations.
+### Phase 2: Visual Improvements (Week 2)
+1. Enhance sprite animations with more frames
+2. Add visual effects for key events (hatching, death)
+3. Implement state-based visual indicators (age, behavior)
+4. Improve visual feedback for user interactions
 
-4. **Interaction Expansion**: Add more ways for users to interact with and influence the system.
+### Phase 3: Performance Optimization (Week 3)
+1. Implement worker pooling to reduce thread overhead
+2. Add spatial partitioning for more efficient rendering
+3. Optimize memory usage with object pooling
+4. Benchmark and tune performance
 
-5. **Documentation**: Continue to document the system architecture and behaviors to facilitate future enhancements.
+### Phase 4: User Interface (Week 4)
+1. Create control panel UI for simulation parameters
+2. Implement entity parameter controls
+3. Add environmental influence tools
+4. Test and refine user experience
 
 ## Active Decisions & Considerations
 
 ### Technical Decisions
-1. **Web Worker Usage**: The decision to use web workers for entity logic provides good separation of concerns but creates overhead for message passing.
+1. **Worker Pooling vs. Individual Workers**: The decision to implement worker pooling balances performance with the existing architecture. Rather than completely rewrite the worker system, we'll enhance it to support multiple entities per worker.
 
-2. **Sprite-Based Rendering**: Using PIXI.js sprites provides efficient rendering but limits the visual complexity that could be achieved with custom WebGL shaders.
+2. **Enhanced Sprite Animations**: Adding more animation frames to the existing sprite system maintains compatibility with PIXI.js while improving visual quality.
 
-3. **Probability-Based Behavior**: The current implementation relies on random number generation for behavior decisions, which is simple but limits complexity.
+3. **Modular Enhancement Approach**: Each enhancement will be designed to work independently, allowing selective implementation based on performance testing results.
 
 ### User Experience Decisions
-1. **Minimalist Interface**: The current design focuses on the visual experience with minimal UI elements, allowing the entities to be the focus.
+1. **Control Panel UI**: Adding a simple, non-intrusive control panel provides user control without overwhelming the visual experience.
 
-2. **Click Interaction**: Simple click-to-spawn is the primary interaction method, keeping the experience accessible but potentially limiting engagement depth.
+2. **Environment Interactions**: Allowing users to add environmental elements provides a new level of interaction while maintaining the core aesthetic.
+
+3. **Balance Between Autonomy and Control**: The design maintains the autonomous nature of entities while giving users meaningful ways to influence the system.
 
 ## Important Patterns & Preferences
 
 ### Code Organization
-- Class-based entity definitions
-- Separation of rendering and logic
-- Message-based communication between threads
+- Maintaining the existing class structure while adding new methods
+- Enhancing the message-passing system for new behavior types
+- Using the established PIXI.js rendering pipeline
 
 ### Naming Conventions
-- CamelCase for class names (Antity, Byproduct)
-- camelCase for variables and methods
-- Descriptive action names in messages (createAntity, moveAntity, etc.)
+- Following existing camelCase conventions for consistency
+- Using descriptive action names in messages that clearly indicate purpose
+- Naming methods based on behavior intent rather than implementation details
 
 ### Architectural Preferences
-- Decoupled components communicating through messages
-- Central World object as the coordinator
-- Entity autonomy with independent worker threads
+- Continuing the decoupled architecture with enhanced message passing
+- Maintaining separation between rendering and logic
+- Using the existing World object as the main coordinator with expanded capabilities
 
 ## Learnings & Project Insights
-The project demonstrates how complex, organic-feeling behaviors can emerge from simple rules and randomness. Key insights include:
+The development plan highlights several key insights that will guide implementation:
 
-1. **Emergent Complexity**: Even with simple probability-based behaviors, interesting patterns emerge from the system as a whole.
+1. **Balance Complexity with Performance**: Each enhancement adds computational overhead, so implementation will need careful performance testing.
 
-2. **Performance Considerations**: Web workers provide good separation but create overhead that needs to be managed for larger populations.
+2. **Visual Feedback is Critical**: Users understand and engage with the system primarily through visual cues, making the visual enhancements as important as behavioral ones.
 
-3. **Visual Simplicity**: The minimal visual design allows the movement patterns to be the focus, creating an aesthetic that is both abstract and seemingly organic.
+3. **Incremental Enhancement**: Building on the existing foundation incrementally allows for regular testing and adjustment rather than risky complete rewrites.
+
+4. **Optimize for Interesting Behaviors**: The goal is not just more complex AI but more interesting and engaging emergent behaviors that surprise and delight users.
