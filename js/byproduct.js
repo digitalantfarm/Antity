@@ -1,5 +1,5 @@
 class Byproduct {
-  constructor(byproductId, parentAntityId, spawnLocation = undefined) {
+  constructor(byproductId, parentAntityId, spawnLocation = undefined, parentState = 'mature') {
     this.ID = byproductId;
     this.parentAntityId = parentAntityId;
     this.isAlive = 1;
@@ -8,9 +8,15 @@ class Byproduct {
     this.fadeStep = 0.005;
     this.fertile = false;
     this.incubationPeriod = 100;
+    this.parentState = parentState;
 
+    // Base fertility rate - can be modified by entity parameters
     this.viabilityProbability = 0.01;
-
+    
+    // Adjust fertility based on parent entity state
+    this.adjustFertilityByParentState();
+    
+    // Determine if this byproduct is fertile
     this.fertilise();
 
     this.cycleInterval = setInterval(function (that) {
@@ -41,6 +47,26 @@ class Byproduct {
 
   setLocation(offset) {
     this.element.offset(offset);
+  }
+
+  // Adjust fertility based on parent entity state
+  adjustFertilityByParentState() {
+    // Parent entity state affects fertility rate
+    if (this.parentState === 'mature') {
+      // Mature entities have higher fertility rate
+      this.viabilityProbability = this.viabilityProbability * 2;
+    } else if (this.parentState === 'young') {
+      // Young entities have slightly lower fertility rate
+      this.viabilityProbability = this.viabilityProbability * 0.75;
+    } else if (this.parentState === 'old') {
+      // Old entities have much lower fertility rate
+      this.viabilityProbability = this.viabilityProbability * 0.3;
+    }
+    
+    // Apply entity fertility rate parameter if available
+    if (typeof fertilityRate !== 'undefined') {
+      this.viabilityProbability = fertilityRate;
+    }
   }
 
   fertilise() {
