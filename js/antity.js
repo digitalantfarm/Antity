@@ -4,17 +4,26 @@ class Antity {
     this.ID = options.ID;
     //console.log('Antity ' + this.ID + ' was created.');
     this.isAlive = 1;
-    this.maxLifespan = 1500;
+    
+    // Use configured lifespan if provided, otherwise default
+    this.maxLifespan = options.maxLifespan || 1500;
     this.lifespan = this.maxLifespan;
+    
     this.offset = options.offset || {
       left: 0,
       top: 0
     };
 
+    // Get configured movement speed or default
+    const movementSpeed = options.movementSpeed || 1;
     this.directionModifier = {
-      left: 1,
-      top: 1
+      left: movementSpeed,
+      top: movementSpeed
     };
+    
+    // Configure fertility rate for byproducts
+    this.fertilityRate = options.fertilityRate || 0.01;
+    
     this.byproducts = {};
     
     // Add position history for memory
@@ -25,6 +34,12 @@ class Antity {
     this.state = 'young'; // young, mature, old
     this.youngThreshold = this.maxLifespan * 0.7;
     this.oldThreshold = this.maxLifespan * 0.3;
+    
+    // Visual parameters for age effects
+    this.baseScale = 1.0;
+    this.scale = 0.8; // Initial scale for young entities
+    this.baseAnimationSpeed = 0.1;
+    this.animationSpeed = 0.15; // Initial animation speed for young entities
     
     // Environment awareness
     this.detectionRange = 50;
@@ -149,6 +164,11 @@ class Antity {
       adjustedProbability = probability * 0.5;
     }
     
+    // Use entity's configured fertility rate if available
+    if (this.fertilityRate) {
+      adjustedProbability = this.fertilityRate;
+    }
+    
     const chanceByproduct = Math.random();
     if (chanceByproduct <= adjustedProbability) {
       let byproductId = uuid.v4();
@@ -249,8 +269,10 @@ class Antity {
     }
   }
   
-  // Update state based on lifespan
+  // Update state based on lifespan and visual parameters
   updateState() {
+    const oldState = this.state;
+    
     if (this.lifespan > this.youngThreshold) {
       this.state = 'young';
     } else if (this.lifespan > this.oldThreshold) {
@@ -259,9 +281,38 @@ class Antity {
       this.state = 'old';
     }
     
-    // Send state update to world
+    // Update visual parameters based on state
+    this.updateVisualParameters();
+    
+    // Send state update to world - include visual parameters
     this.action = 'updateState';
     postMessage(this);
+  }
+  
+  // Update visual parameters based on age/state
+  updateVisualParameters() {
+    let scale, animSpeed;
+    
+    // Scale changes with age
+    if (this.state === 'young') {
+      // Young antities are smaller but grow
+      const growthProgress = 1 - ((this.lifespan - this.youngThreshold) / (this.maxLifespan - this.youngThreshold));
+      scale = 0.7 + (growthProgress * 0.3); // 0.7 to 1.0
+      animSpeed = this.baseAnimationSpeed * 1.5; // Faster animation when young
+    } else if (this.state === 'mature') {
+      // Mature antities are full size
+      scale = 1.0;
+      animSpeed = this.baseAnimationSpeed;
+    } else {
+      // Old antities shrink and slow down
+      const ageProgress = 1 - (this.lifespan / this.oldThreshold);
+      scale = 1.0 - (ageProgress * 0.3); // 1.0 to 0.7
+      animSpeed = this.baseAnimationSpeed * (1 - (ageProgress * 0.5)); // Slow down with age
+    }
+    
+    // Store for sending to world
+    this.scale = scale;
+    this.animationSpeed = animSpeed;
   }
 
   kill() {

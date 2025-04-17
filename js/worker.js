@@ -13,8 +13,19 @@ var isPaused = false;
 let entities = {};
 // Environment data storage
 let environment = [];
+// Default entity parameters
+let defaultParams = {
+  lifespan: 1500,
+  movementSpeed: 1,
+  fertilityRate: 0.01
+};
 
 onmessage = function (e) {
+  if (isPaused && e.data.action !== 'resumeSimulation') {
+    // Don't process messages while paused (except resume command)
+    return;
+  }
+  
   if (typeof e.data == 'object' && e.data.action) {
     switch (e.data.action) {
       case 'createAntity':
@@ -70,12 +81,29 @@ onmessage = function (e) {
           updateEntityParams(e.data.params);
         }
         break;
+      case 'setLifespan':
+        // Update default lifespan for new entities
+        if (typeof e.data.lifespan === 'number') {
+          defaultParams.lifespan = e.data.lifespan;
+        }
+        break;
     }
   }
 };
 
 function createAntity(data) {
   //console.log('Instantiating Antity...');
+  
+  // Apply default parameters if specified
+  if (data.defaultLifespan && typeof data.defaultLifespan === 'number') {
+    defaultParams.lifespan = data.defaultLifespan;
+  }
+  
+  // Extend data with parameter values before creating entity
+  data.maxLifespan = defaultParams.lifespan;
+  data.movementSpeed = defaultParams.movementSpeed;
+  data.fertilityRate = defaultParams.fertilityRate;
+  
   let newAntity = new Antity(data);
   entities[data.ID] = newAntity;
 }
@@ -139,18 +167,38 @@ function respondToNearbyDetection(entityData) {
 
 // Update parameters for all entities
 function updateEntityParams(params) {
+  // Update default parameters for new entities
+  if (params.lifespan) {
+    defaultParams.lifespan = params.lifespan;
+  }
+  if (params.movementSpeed) {
+    defaultParams.movementSpeed = params.movementSpeed;
+  }
+  if (params.fertilityRate) {
+    defaultParams.fertilityRate = params.fertilityRate;
+  }
+  
+  // Update existing entities
   for (let id in entities) {
     let entity = entities[id];
     
-    // Update lifespan for new entities (don't change current entities)
+    // Update lifespan for entities
     if (params.lifespan && entity.maxLifespan) {
+      // Store the original lifespan proportion
+      const proportion = entity.lifespan / entity.maxLifespan;
+      
+      // Update max lifespan
       entity.maxLifespan = params.lifespan;
-      // Only set current lifespan if the entity is young
-      if (entity.state === 'young') {
-        entity.lifespan = params.lifespan;
-        entity.youngThreshold = entity.maxLifespan * 0.7;
-        entity.oldThreshold = entity.maxLifespan * 0.3;
-      }
+      
+      // Update current lifespan proportionally to preserve state
+      entity.lifespan = Math.round(proportion * params.lifespan);
+      
+      // Update thresholds
+      entity.youngThreshold = entity.maxLifespan * 0.7;
+      entity.oldThreshold = entity.maxLifespan * 0.3;
+      
+      // Trigger state update
+      entity.updateState();
     }
     
     // Update movement speed
@@ -171,7 +219,6 @@ function updateEntityParams(params) {
     // Update fertility rate for byproduct generation
     if (params.fertilityRate && entity.byproducts) {
       // This will affect newly created byproducts
-      // We'll need to update the Byproduct class to use this
       entity.fertilityRate = params.fertilityRate;
     }
   }

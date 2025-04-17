@@ -38,10 +38,36 @@ class World {
     // Spatial partitioning
     this.gridCellSize = 100; // Size of each grid cell
     this.grid = {}; // Grid cells indexed by "x,y"
+    
+    // Performance metrics
+    this.metrics = {
+      fps: 0,
+      frameTime: 0,
+      lastFrameTime: performance.now(),
+      frameCount: 0,
+      lastFpsUpdate: 0,
+      renderTime: 0,
+      messageCount: 0,
+      messageRate: 0,
+      lastMessageCount: 0,
+      lastMessageRateUpdate: 0,
+      entityCountByState: {
+        young: 0,
+        mature: 0,
+        old: 0
+      },
+      byproductCount: 0
+    };
+    
+    // Entity limiter for performance control
+    this.maxEntities = 1000; // Default maximum entities
 
     loader
       .add('img/antity-spritesheet.png')
       .load(this.createWorld.bind(this));
+      
+    // Start metrics update interval
+    this.metricsInterval = setInterval(this.updateMetricsDisplay.bind(this), 1000);
   }
 
   createWorld() {
@@ -99,9 +125,29 @@ class World {
   }
 
   animate() {
+    // Track frame start time for performance metrics
+    const startTime = performance.now();
+    
+    // Calculate time since last frame for FPS
+    const currentTime = startTime;
+    const deltaTime = currentTime - this.metrics.lastFrameTime;
+    this.metrics.lastFrameTime = currentTime;
+    
+    // Update FPS counter (once per second)
+    this.metrics.frameCount++;
+    if (currentTime - this.metrics.lastFpsUpdate >= 1000) {
+      this.metrics.fps = Math.round(this.metrics.frameCount * 1000 / (currentTime - this.metrics.lastFpsUpdate));
+      this.metrics.frameCount = 0;
+      this.metrics.lastFpsUpdate = currentTime;
+    }
+    
+    // Perform animation frame
     requestAnimationFrame(this.animate.bind(this));
     this.animateSprites();
     this.renderer.render(this.stage);
+    
+    // Measure render time
+    this.metrics.renderTime = performance.now() - startTime;
   }
   
   // Animate sprites based on their state and frames
@@ -117,12 +163,19 @@ class World {
   }
 
   startWorker(spawnLocation = undefined) {
+    // Check if entity limit is reached
+    if (this.antityCount >= this.maxEntities) {
+      console.log(`Entity limit (${this.maxEntities}) reached. Not spawning new entity.`);
+      return null; // Return null to indicate no entity was created
+    }
+    
     let workerID = uuid.v4();
     let options = {
       action: 'createAntity',
       ID: workerID,
       offset: {},
-      dimensions: this.dimensions
+      dimensions: this.dimensions,
+      defaultLifespan: this.defaultLifespan || 1500 // Pass configurable lifespan
     };
     
     if (spawnLocation === undefined) {
@@ -149,10 +202,12 @@ class World {
     
     // Send creation message
     leastBusyWorker.postMessage(options);
+    this.metrics.messageCount++;
   }
 
   addAntity(elementObject) {
     this.antityCount++;
+    this.metrics.entityCountByState.young++; // New entities are always young
     
     // Create animation frames array
     let frames = [
@@ -171,6 +226,7 @@ class World {
     antity.position.set(elementObject.offset.left, elementObject.offset.top);
     antity.anchor.x = 0.5;
     antity.anchor.y = 0.5;
+    antity.state = 'young'; // Track state for metrics
 
     this.sprites[elementObject.ID] = antity;
     this.antityStage.addChild(this.sprites[elementObject.ID]);
@@ -191,6 +247,13 @@ class World {
   killAntity(elementObject) {
     if (elementObject.isAlive == 0) {
       this.antityCount--;
+      
+      // Update metrics by state count
+      const antity = this.sprites[elementObject.ID];
+      if (antity && antity.state) {
+        this.metrics.entityCountByState[antity.state]--;
+      }
+      
       //console.log(elementObject.ID);
       //console.log(this.sprites[elementObject.ID]);
       //console.log(this.sprites[elementObject.ID].visible);
@@ -198,6 +261,7 @@ class World {
       this.antityStage.removeChild(this.sprites[elementObject.ID]);
       //console.log('Antity dead.');
       this.workers[elementObject.ID].postMessage(elementObject);
+      this.metrics.messageCount++;
     }
     if (this.antityCount < 1 && this.eggCount < 1) {
       //console.log('Resurrection!');
@@ -247,6 +311,8 @@ class World {
   addByproduct(elementObject) {
     if (elementObject.fertile) {
       this.eggCount++;
+    } else {
+      this.metrics.byproductCount++;
     }
 
     // Get byproduct from pool
@@ -274,6 +340,8 @@ class World {
       // Update count
       if (elementObject.fertile) {
         this.eggCount--;
+      } else {
+        this.metrics.byproductCount--;
       }
       
       // Return to pool instead of removing
@@ -287,6 +355,7 @@ class World {
       
       // Notify worker
       this.workers[elementObject.parentAntityId].postMessage(elementObject);
+      this.metrics.messageCount++;
     }
   }
 
@@ -314,7 +383,89 @@ class World {
     return Object.keys(this.workers).length;
   }
 
+  // Update metrics displayed in the dashboard
+  updateMetricsDisplay() {
+    // Update FPS
+    document.getElementById('fps-counter').textContent = this.metrics.fps;
+    if (this.metrics.fps < 30) {
+      document.getElementById('fps-counter').className = 'metric-value metric-danger';
+    } else if (this.metrics.fps < 50) {
+      document.getElementById('fps-counter').className = 'metric-value metric-warning';
+    } else {
+      document.getElementById('fps-counter').className = 'metric-value';
+    }
+    
+    // Update entity counts with limit
+    document.getElementById('entity-counter').textContent = `${this.antityCount}/${this.maxEntities}`;
+    
+    // Add visual indicator if near limit
+    if (this.antityCount > this.maxEntities * 0.9) {
+      document.getElementById('entity-counter').className = 'metric-value metric-danger';
+    } else if (this.antityCount > this.maxEntities * 0.7) {
+      document.getElementById('entity-counter').className = 'metric-value metric-warning';
+    } else {
+      document.getElementById('entity-counter').className = 'metric-value';
+    }
+    document.getElementById('young-counter').textContent = this.metrics.entityCountByState.young;
+    document.getElementById('mature-counter').textContent = this.metrics.entityCountByState.mature;
+    document.getElementById('old-counter').textContent = this.metrics.entityCountByState.old;
+    
+    // Update entity state chart
+    if (this.antityCount > 0) {
+      const youngPercent = (this.metrics.entityCountByState.young / this.antityCount * 100) + '%';
+      const maturePercent = (this.metrics.entityCountByState.mature / this.antityCount * 100) + '%';
+      const oldPercent = (this.metrics.entityCountByState.old / this.antityCount * 100) + '%';
+      
+      document.querySelector('#entity-state-chart .state-young').style.width = youngPercent;
+      document.querySelector('#entity-state-chart .state-mature').style.width = maturePercent;
+      document.querySelector('#entity-state-chart .state-old').style.width = oldPercent;
+    } else {
+      document.querySelector('#entity-state-chart .state-young').style.width = '0%';
+      document.querySelector('#entity-state-chart .state-mature').style.width = '0%';
+      document.querySelector('#entity-state-chart .state-old').style.width = '0%';
+    }
+    
+    // Update byproduct counts
+    document.getElementById('byproduct-counter').textContent = this.metrics.byproductCount;
+    document.getElementById('egg-counter').textContent = this.eggCount;
+    
+    // Update render time
+    document.getElementById('render-time').textContent = this.metrics.renderTime.toFixed(2) + ' ms';
+    if (this.metrics.renderTime > 16) {
+      document.getElementById('render-time').className = 'metric-value metric-danger';
+    } else if (this.metrics.renderTime > 10) {
+      document.getElementById('render-time').className = 'metric-value metric-warning';
+    } else {
+      document.getElementById('render-time').className = 'metric-value';
+    }
+    
+    // Calculate and update message rate
+    const messagesSinceLastUpdate = this.metrics.messageCount - this.metrics.lastMessageCount;
+    this.metrics.messageRate = messagesSinceLastUpdate;
+    this.metrics.lastMessageCount = this.metrics.messageCount;
+    document.getElementById('message-counter').textContent = this.metrics.messageRate + ' msg/sec';
+    
+    // Update memory usage if performance.memory is available (Chrome only)
+    if (performance.memory) {
+      const memoryUsage = Math.round(performance.memory.usedJSHeapSize / (1024 * 1024));
+      document.getElementById('memory-usage').textContent = memoryUsage + ' MB';
+      
+      if (memoryUsage > 100) {
+        document.getElementById('memory-usage').className = 'metric-value metric-danger';
+      } else if (memoryUsage > 50) {
+        document.getElementById('memory-usage').className = 'metric-value metric-warning';
+      } else {
+        document.getElementById('memory-usage').className = 'metric-value';
+      }
+    } else {
+      document.getElementById('memory-usage').textContent = 'N/A';
+    }
+  }
+
   listener(e) {
+    // Track message counts for metrics
+    world.metrics.messageCount++;
+    
     switch(e.data.action) {
       case 'createAntity':
         world.addAntity(e.data);
@@ -406,6 +557,16 @@ class World {
     let antity = this.sprites[elementObject.ID];
     if (!antity) return;
     
+    // Update metrics if state has changed
+    if (antity.state && antity.state !== elementObject.state) {
+      this.metrics.entityCountByState[antity.state]--;
+      this.metrics.entityCountByState[elementObject.state]++;
+    }
+    
+    // Update antity's state
+    antity.state = elementObject.state;
+    
+    // Update visual appearance based on state
     switch(elementObject.state) {
       case 'young':
         antity.tint = 0xaaffaa; // Greenish for young
@@ -416,6 +577,16 @@ class World {
       case 'old':
         antity.tint = 0xffaaaa; // Reddish for old
         break;
+    }
+    
+    // Apply scale if provided
+    if (elementObject.scale) {
+      antity.scale.set(elementObject.scale, elementObject.scale);
+    }
+    
+    // Apply animation speed if provided
+    if (elementObject.animationSpeed) {
+      antity.animationSpeed = elementObject.animationSpeed;
     }
   }
   
@@ -438,6 +609,7 @@ class World {
       action: 'updateEnvironment',
       environment: environmentData
     });
+    this.metrics.messageCount++;
   }
   
   // Create environment container (will be filled in Phase 4)
@@ -474,4 +646,7 @@ function click2create() {
 // Initialize environment when document is ready
 $(document).ready(function() {
   world.initializeEnvironment();
+  
+  // Enable click to create entities
+  click2create();
 });
