@@ -44,6 +44,13 @@ class Antity {
     // Environment awareness
     this.detectionRange = 50;
     this.nearbyElements = [];
+    
+    // Performance optimizations
+    this.useMessageQueue = options.useMessageQueue || false; // Flag to indicate batched messaging
+    this.byproductLimits = options.byproductLimits || null; // Byproduct limits
+    this.updateFrequency = 3; // Only send position updates every N cycles
+    this.stateUpdateFrequency = 5; // Only send state updates every N cycles
+    this.cycleCount = 0; // Track cycle count for throttling updates
 
     this.cycleInterval = setInterval(function (that) {
       that.cycle();
@@ -52,10 +59,13 @@ class Antity {
 
   cycle() {
     if (this.isAlive > 0) {
+      this.cycleCount++;
       this.lifespan--;
       
-      // Update entity state based on remaining lifespan
-      this.updateState();
+      // Update entity state based on remaining lifespan - throttled updates
+      if (this.cycleCount % this.stateUpdateFrequency === 0) {
+        this.updateState();
+      }
       
       // Record current position for memory
       this.recordPosition();
@@ -63,18 +73,21 @@ class Antity {
       // Use memory to influence movement
       this.avoidRecentPositions();
       
-      // Environmental awareness every 10 cycles
-      if (this.lifespan % 10 === 0) {
+      // Environmental awareness - reduced frequency
+      if (this.lifespan % 30 === 0) { // Increased from 10 to 30
         this.detectNearbyElements();
       }
       
       this.chooseDirection();
       this.doMove();
-      this.generateByproduct();
+      
+      // Throttle byproduct generation based on performance concerns
+      if (this.cycleCount % 5 === 0) { // Only try to generate byproducts every 5 cycles
+        this.generateByproduct();
+      }
 
       if (this.lifespan <= 0) {
         this.kill();
-        //console.log(Object.keys(this.byproducts).length);
       }
     }
   }
@@ -99,8 +112,24 @@ class Antity {
     }
 
     this.offset = newOffset;
-    this.action = 'moveAntity';
-    postMessage(this);
+    
+    // Only send move updates at reduced frequency to improve performance
+    if (this.cycleCount % this.updateFrequency === 0) {
+      this.action = 'moveAntity';
+      // Use batched messaging or direct postMessage based on flag
+      this.sendMessage(this);
+    }
+  }
+
+  sendMessage(message) {
+    // Use queue system if available, otherwise direct post
+    if (this.useMessageQueue) {
+      // Use the global queueMessage function
+      queueMessage(message);
+    } else {
+      // Fall back to direct postMessage
+      postMessage(message);
+    }
   }
 
   chooseDirection(probability = 0.1) {
@@ -153,6 +182,25 @@ class Antity {
   }
 
   generateByproduct(probability = 0.1) {
+    // Check byproduct limits before attempting to create
+    if (this.byproductLimits) {
+      // Reduce generation probability as we approach limits
+      const currentCount = Object.keys(this.byproducts).length;
+      const totalCount = this.byproductLimits.current;
+      
+      if (currentCount >= this.byproductLimits.perEntity || 
+          totalCount >= this.byproductLimits.total) {
+        return; // Skip byproduct generation if at limits
+      }
+      
+      // Reduce probability as we approach limits
+      const entityRatio = currentCount / this.byproductLimits.perEntity;
+      const globalRatio = totalCount / this.byproductLimits.total;
+      
+      // Scale down probability based on how close we are to limits
+      probability *= (1 - Math.max(entityRatio, globalRatio) * 0.8);
+    }
+    
     // Adjust probability based on entity state
     let adjustedProbability = probability;
     
@@ -172,6 +220,12 @@ class Antity {
     const chanceByproduct = Math.random();
     if (chanceByproduct <= adjustedProbability) {
       let byproductId = uuid.v4();
+      
+      // Check with worker if we can create this byproduct (respecting limits)
+      if (typeof registerByproduct === 'function' && !registerByproduct(this.ID)) {
+        return; // Limit reached, don't create byproduct
+      }
+      
       // Pass entity state to byproduct for fertility adjustments
       this.byproducts[byproductId] = new Byproduct(byproductId, this.ID, this.offset, this.state);
     }
@@ -224,7 +278,7 @@ class Antity {
   detectNearbyElements() {
     // Request nearby elements from worker
     this.action = 'detectNearby';
-    postMessage(this);
+    this.sendMessage(this);
   }
   
   // Respond to environmental elements
@@ -284,9 +338,12 @@ class Antity {
     // Update visual parameters based on state
     this.updateVisualParameters();
     
-    // Send state update to world - include visual parameters
-    this.action = 'updateState';
-    postMessage(this);
+    // Only send state updates when state actually changes
+    if (oldState !== this.state) {
+      // Send state update to world - include visual parameters
+      this.action = 'updateState';
+      this.sendMessage(this);
+    }
   }
   
   // Update visual parameters based on age/state
@@ -319,6 +376,7 @@ class Antity {
     //console.log('Antity ' + this.ID + ' is now finished.');
     this.isAlive = 0;
     this.action = 'killAntity';
+    // Always use direct postMessage for critical operations like kills
     postMessage(this);
   }
 }

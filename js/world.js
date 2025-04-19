@@ -56,11 +56,19 @@ class World {
         mature: 0,
         old: 0
       },
-      byproductCount: 0
+      byproductCount: 0,
+      batchedMessages: 0,
+      processedMessages: 0
     };
     
     // Entity limiter for performance control
     this.maxEntities = 1000; // Default maximum entities
+    
+    // Byproduct limits for performance
+    this.byproductLimits = {
+      perEntity: 10,  // Max byproducts per entity
+      total: 2000     // Max total byproducts
+    };
 
     loader
       .add('img/antity-spritesheet.png')
@@ -68,6 +76,19 @@ class World {
       
     // Start metrics update interval
     this.metricsInterval = setInterval(this.updateMetricsDisplay.bind(this), 1000);
+    
+    // Add resurrection check interval - acts as a failsafe
+    this.resurrectionInterval = setInterval(() => {
+      if (this.antityCount === 0 && this.eggCount === 0) {
+        console.log("Resurrection check - no entities found, creating new ones");
+        this.startWorker();
+      }
+    }, 5000); // Check every 5 seconds
+    
+    // Culling system (only render what's visible)
+    this.enableCulling = true;
+    this.cullMargin = 100; // Buffer zone around visible area
+    this.visibleEntities = new Set();
   }
 
   createWorld() {
@@ -95,6 +116,9 @@ class World {
     
     // Create worker pool
     this.createWorkerPool();
+    
+    // Set byproduct limits in workers
+    this.updateByproductLimits();
 
     this.animate();
     this.startWorker();
@@ -123,6 +147,18 @@ class World {
       this.workerPool.push(worker);
     }
   }
+  
+  // Update byproduct limits across all workers
+  updateByproductLimits() {
+    // Send to all workers
+    for (let worker of this.workerPool) {
+      worker.postMessage({
+        action: 'setByproductLimit',
+        perEntity: this.byproductLimits.perEntity,
+        total: this.byproductLimits.total
+      });
+    }
+  }
 
   animate() {
     // Track frame start time for performance metrics
@@ -143,11 +179,52 @@ class World {
     
     // Perform animation frame
     requestAnimationFrame(this.animate.bind(this));
+    
+    // Apply visibility culling
+    if (this.enableCulling) {
+      this.cullEntities();
+    }
+    
     this.animateSprites();
     this.renderer.render(this.stage);
     
     // Measure render time
     this.metrics.renderTime = performance.now() - startTime;
+  }
+  
+  // Perform visibility culling - only render what's visible
+  cullEntities() {
+    // Define visible area (viewport + margin)
+    const margin = this.cullMargin;
+    const visibleBounds = {
+      left: -margin,
+      top: -margin,
+      right: this.dimensions.width + margin,
+      bottom: this.dimensions.height + margin
+    };
+    
+    // Reset visible entities set
+    this.visibleEntities.clear();
+    
+    // Check each sprite
+    for (let id in this.sprites) {
+      const sprite = this.sprites[id];
+      
+      // Check if in visible area
+      const isVisible = 
+        sprite.position.x + sprite.width/2 >= visibleBounds.left &&
+        sprite.position.x - sprite.width/2 <= visibleBounds.right &&
+        sprite.position.y + sprite.height/2 >= visibleBounds.top &&
+        sprite.position.y - sprite.height/2 <= visibleBounds.bottom;
+      
+      // Update visibility
+      sprite.visible = isVisible;
+      
+      // Track visible entities
+      if (isVisible) {
+        this.visibleEntities.add(id);
+      }
+    }
   }
   
   // Animate sprites based on their state and frames
@@ -203,6 +280,8 @@ class World {
     // Send creation message
     leastBusyWorker.postMessage(options);
     this.metrics.messageCount++;
+    
+    return workerID; // Return the ID of the created entity
   }
 
   addAntity(elementObject) {
@@ -240,8 +319,31 @@ class World {
 
   moveAntity(elementObject) {
     let antity = this.sprites[elementObject.ID];
-    //antity.position.set(elementObject.offset.left - (antity.width / 2), elementObject.offset.top - (antity.height / 2));
-    antity.position.set(elementObject.offset.left, elementObject.offset.top);
+    
+    if (antity) {
+      antity.position.set(elementObject.offset.left, elementObject.offset.top);
+    }
+  }
+
+  // Check if we need to resurrect the simulation
+  checkForResurrection() {
+    // Extra debug logging
+    console.log(`Checking resurrection need: entities=${this.antityCount}, eggs=${this.eggCount}`);
+    
+    // If there are no entities or eggs, resurrect
+    if (this.antityCount === 0 && this.eggCount === 0) {
+      console.log("No entities remain - resurrecting simulation");
+      
+      // Force reset any tracking that might be out of sync
+      this.antityCount = 0;
+      this.eggCount = 0;
+      this.metrics.entityCountByState.young = 0;
+      this.metrics.entityCountByState.mature = 0;
+      this.metrics.entityCountByState.old = 0;
+      
+      // Create a new entity with a slight delay for stability
+      setTimeout(() => this.startWorker(), 500);
+    }
   }
 
   killAntity(elementObject) {
@@ -254,18 +356,20 @@ class World {
         this.metrics.entityCountByState[antity.state]--;
       }
       
-      //console.log(elementObject.ID);
-      //console.log(this.sprites[elementObject.ID]);
-      //console.log(this.sprites[elementObject.ID].visible);
-      this.sprites[elementObject.ID].visible = false;
-      this.antityStage.removeChild(this.sprites[elementObject.ID]);
-      //console.log('Antity dead.');
-      this.workers[elementObject.ID].postMessage(elementObject);
-      this.metrics.messageCount++;
-    }
-    if (this.antityCount < 1 && this.eggCount < 1) {
-      //console.log('Resurrection!');
-      this.startWorker();
+      if (this.sprites[elementObject.ID]) {
+        this.sprites[elementObject.ID].visible = false;
+        this.antityStage.removeChild(this.sprites[elementObject.ID]);
+        
+        // Notify worker
+        this.workers[elementObject.ID].postMessage(elementObject);
+        this.metrics.messageCount++;
+        
+        // Remove from sprites dictionary
+        delete this.sprites[elementObject.ID];
+      }
+      
+      // Check if we need to resurrect - moved from the end to ensure it's called after each kill
+      this.checkForResurrection();
     }
   }
 
@@ -330,7 +434,9 @@ class World {
   }
 
   fadeByproduct(elementObject) {
-    this.sprites[elementObject.ID].alpha = elementObject.opacity;
+    if (this.sprites[elementObject.ID]) {
+      this.sprites[elementObject.ID].alpha = elementObject.opacity;
+    }
   }
 
   killByproduct(elementObject) {
@@ -338,24 +444,26 @@ class World {
       let byproduct = this.sprites[elementObject.ID];
       
       // Update count
-      if (elementObject.fertile) {
-        this.eggCount--;
-      } else {
-        this.metrics.byproductCount--;
-      }
-      
-      // Return to pool instead of removing
       if (byproduct) {
+        if (byproduct.type === 'Egg') {
+          this.eggCount--;
+        } else {
+          this.metrics.byproductCount--;
+        }
+        
+        // Return to pool instead of removing
         byproduct.visible = false;
         byproduct.inUse = false;
         
         // Remove from sprites dictionary
         delete this.sprites[elementObject.ID];
+        
+        // Notify worker
+        if (elementObject.parentAntityId && this.workers[elementObject.parentAntityId]) {
+          this.workers[elementObject.parentAntityId].postMessage(elementObject);
+          this.metrics.messageCount++;
+        }
       }
-      
-      // Notify worker
-      this.workers[elementObject.parentAntityId].postMessage(elementObject);
-      this.metrics.messageCount++;
     }
   }
 
@@ -443,7 +551,12 @@ class World {
     const messagesSinceLastUpdate = this.metrics.messageCount - this.metrics.lastMessageCount;
     this.metrics.messageRate = messagesSinceLastUpdate;
     this.metrics.lastMessageCount = this.metrics.messageCount;
-    document.getElementById('message-counter').textContent = this.metrics.messageRate + ' msg/sec';
+    
+    // Show batched message stats
+    const batchEfficiency = this.metrics.batchedMessages > 0 ? 
+      (this.metrics.processedMessages / this.metrics.batchedMessages).toFixed(1) : 0;
+    document.getElementById('message-counter').textContent = 
+      `${this.metrics.messageRate} msg/sec (${batchEfficiency}x)`;
     
     // Update memory usage if performance.memory is available (Chrome only)
     if (performance.memory) {
@@ -462,10 +575,56 @@ class World {
     }
   }
 
+  // Process batched messages
+  processBatch(batch) {
+    if (!batch.messages || !Array.isArray(batch.messages)) {
+      return;
+    }
+    
+    this.metrics.batchedMessages++;
+    this.metrics.processedMessages += batch.messages.length;
+    
+    // Process each message in the batch
+    for (const message of batch.messages) {
+      this.processMessage(message);
+    }
+  }
+  
+  // Process an individual message
+  processMessage(message) {
+    switch(message.action) {
+      case 'moveAntity':
+        this.moveAntity(message);
+        break;
+      case 'killAntity':
+        this.killAntity(message);
+        break;
+      case 'createByproduct':
+        this.addByproduct(message);
+        break;
+      case 'fadeByproduct':
+        this.fadeByproduct(message);
+        break;
+      case 'killByproduct':
+        this.killByproduct(message);
+        break;
+      case 'updateState':
+        this.updateAntityState(message);
+        break;
+    }
+  }
+
   listener(e) {
     // Track message counts for metrics
     world.metrics.messageCount++;
     
+    // Handle batched messages
+    if (e.data.action === 'batchedMessages') {
+      world.processBatch(e.data);
+      return;
+    }
+    
+    // Handle individual messages
     switch(e.data.action) {
       case 'createAntity':
         world.addAntity(e.data);
@@ -483,8 +642,6 @@ class World {
         world.fadeByproduct(e.data);
         break;
       case 'hatchByproduct':
-        //console.log('Hatching!');
-        // Add hatching visual effect
         world.hatchByproduct(e.data);
         break;
       case 'killByproduct':
@@ -496,11 +653,17 @@ class World {
       case 'detectNearby':
         world.handleNearbyDetection(e.data);
         break;
+      case 'workerIdle':
+        // Track worker as idle but don't terminate it
+        world.checkForResurrection();
+        break;
     }
   }
   
   // Add hatching animation visual effect
   hatchByproduct(elementObject) {
+    console.log("World received hatchByproduct message:", elementObject);
+    
     // Create particle effect for hatching
     let particles = new Container();
     
@@ -523,6 +686,10 @@ class World {
     
     this.stage.addChild(particles);
     
+    // Immediately spawn new entity for reliability
+    console.log("Spawning new entity from hatched egg at", elementObject.offset);
+    world.startWorker(elementObject.offset);
+    
     // Animate particles
     let lifetime = 0;
     const maxLifetime = 30;
@@ -541,8 +708,6 @@ class World {
       // Remove particles after animation completes
       if (lifetime >= maxLifetime) {
         this.stage.removeChild(particles);
-        // Start new entity
-        world.startWorker(elementObject.offset);
         return;
       }
       
@@ -625,6 +790,15 @@ class World {
         this.environmentObjects = [];
       }
     }
+  }
+  
+  // Set byproduct limits and update UI
+  setByproductLimits(perEntity, total) {
+    this.byproductLimits.perEntity = perEntity;
+    this.byproductLimits.total = total;
+    
+    // Update in workers
+    this.updateByproductLimits();
   }
 }
 

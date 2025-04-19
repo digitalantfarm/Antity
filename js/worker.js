@@ -20,6 +20,73 @@ let defaultParams = {
   fertilityRate: 0.01
 };
 
+// Message batching system to reduce communication overhead
+let messageQueue = [];
+let lastMessageSend = Date.now();
+const MESSAGE_BATCH_INTERVAL = 100; // Send batched messages every 100ms
+const MAX_BATCH_SIZE = 50; // Maximum messages per batch
+
+// Byproduct management
+let MAX_BYPRODUCTS_PER_ENTITY = 10; // Limit byproducts per entity
+let MAX_TOTAL_BYPRODUCTS = 2000; // Global limit for all byproducts
+let totalByproductCount = 0;
+
+// Start message batching interval
+const batchInterval = setInterval(sendBatchedMessages, MESSAGE_BATCH_INTERVAL);
+
+// Function to send batched messages
+function sendBatchedMessages() {
+  if (messageQueue.length === 0) return;
+  
+  // Sort messages by priority (move, state updates first)
+  messageQueue.sort((a, b) => {
+    // Priority: 1. Kill messages, 2. Move messages, 3. State updates, 4. Others
+    const getPriority = (msg) => {
+      if (msg.action === 'killAntity' || msg.action === 'killByproduct') return 0;
+      if (msg.action === 'moveAntity') return 1; 
+      if (msg.action === 'updateState') return 2;
+      return 3;
+    };
+    return getPriority(a) - getPriority(b);
+  });
+  
+  // Take messages up to batch size limit
+  const messagesToSend = messageQueue.splice(0, MAX_BATCH_SIZE);
+  
+  // Combine similar messages (e.g., multiple move updates for same entity)
+  const uniqueMessages = {};
+  messagesToSend.forEach(msg => {
+    // Use ID + action as key to avoid duplicates
+    const key = msg.ID + "-" + msg.action;
+    // Always keep the most recent message for each entity+action
+    uniqueMessages[key] = msg;
+  });
+  
+  // Send the batch as a single message
+  postMessage({
+    action: 'batchedMessages',
+    messages: Object.values(uniqueMessages)
+  });
+  
+  lastMessageSend = Date.now();
+}
+
+// Queue a message instead of sending immediately
+function queueMessage(message) {
+  // Critical messages (like kills) get sent immediately
+  if (message.action === 'killAntity') {
+    postMessage(message);
+    return;
+  }
+  
+  messageQueue.push({...message}); // Clone the message to avoid reference issues
+  
+  // If queue is getting large, send immediately
+  if (messageQueue.length >= MAX_BATCH_SIZE) {
+    sendBatchedMessages();
+  }
+}
+
 onmessage = function (e) {
   if (isPaused && e.data.action !== 'resumeSimulation') {
     // Don't process messages while paused (except resume command)
@@ -30,7 +97,7 @@ onmessage = function (e) {
     switch (e.data.action) {
       case 'createAntity':
         createAntity(e.data);
-        postMessage(e.data);
+        postMessage(e.data); // Still send immediate confirmation for entity creation
         break;
       case 'killAntity':
         if (entities[e.data.ID]) {
@@ -44,6 +111,7 @@ onmessage = function (e) {
           let antity = entities[e.data.parentAntityId];
           if (antity.byproducts[e.data.ID]) {
             antity.byproducts[e.data.ID].isAlive = -1;
+            totalByproductCount--;
             checkWorkerStatus();
           }
         }
@@ -52,7 +120,7 @@ onmessage = function (e) {
         // Just acknowledge the state update from an entity
         break;
       case 'detectNearby':
-        // Process environmental awareness request
+        // Process environmental awareness request - reduce frequency
         if (entities[e.data.ID]) {
           respondToNearbyDetection(e.data);
         }
@@ -87,6 +155,15 @@ onmessage = function (e) {
           defaultParams.lifespan = e.data.lifespan;
         }
         break;
+      case 'setByproductLimit':
+        // Update byproduct limits
+        if (typeof e.data.perEntity === 'number') {
+          MAX_BYPRODUCTS_PER_ENTITY = e.data.perEntity;
+        }
+        if (typeof e.data.total === 'number') {
+          MAX_TOTAL_BYPRODUCTS = e.data.total;
+        }
+        break;
     }
   }
 };
@@ -104,6 +181,14 @@ function createAntity(data) {
   data.movementSpeed = defaultParams.movementSpeed;
   data.fertilityRate = defaultParams.fertilityRate;
   
+  // Add byproduct limits information, but don't pass the function directly
+  data.useMessageQueue = true; // Flag to indicate batch messaging should be used
+  data.byproductLimits = {
+    perEntity: MAX_BYPRODUCTS_PER_ENTITY,
+    total: MAX_TOTAL_BYPRODUCTS,
+    current: totalByproductCount
+  };
+  
   let newAntity = new Antity(data);
   entities[data.ID] = newAntity;
 }
@@ -116,7 +201,7 @@ function getByproductCount(a) {
 function checkWorkerStatus() {
   let totalEntities = Object.keys(entities).length;
   let activeEntities = 0;
-  let totalByproducts = 0;
+  totalByproductCount = 0;
   
   // Count active entities and byproducts
   for (let id in entities) {
@@ -124,13 +209,40 @@ function checkWorkerStatus() {
     if (entity.isAlive > 0) {
       activeEntities++;
     }
-    totalByproducts += getByproductCount(entity);
+    const entityByproducts = getByproductCount(entity);
+    totalByproductCount += entityByproducts;
   }
   
-  // If nothing is active and no byproducts remain, we can close this worker
-  if (activeEntities === 0 && totalByproducts === 0 && totalEntities > 0) {
-    this.close();
+  // NEVER close the worker completely - this prevents resurrection
+  // Just report inactive status if needed
+  if (activeEntities === 0 && totalByproductCount === 0 && totalEntities > 0) {
+    // Send any remaining messages
+    sendBatchedMessages();
+    
+    // Notify main thread this worker is idle but don't close
+    postMessage({
+      action: 'workerIdle',
+      workerId: self.id
+    });
   }
+}
+
+// Register a new byproduct and check against limits
+function registerByproduct(antityId) {
+  // Check if we're at the global limit
+  if (totalByproductCount >= MAX_TOTAL_BYPRODUCTS) {
+    return false;
+  }
+  
+  // Check if entity is at its individual limit
+  const entity = entities[antityId];
+  if (entity && getByproductCount(entity) >= MAX_BYPRODUCTS_PER_ENTITY) {
+    return false;
+  }
+  
+  // We're within limits, so increment counter
+  totalByproductCount++;
+  return true;
 }
 
 // Process nearby element detection request
@@ -155,9 +267,6 @@ function respondToNearbyDetection(entityData) {
       }
     }
   }
-  
-  // Also detect other entities (not implemented yet)
-  // This would require knowledge of all entity positions
   
   // Return the detected elements to the entity
   if (entity.respondToEnvironment) {
